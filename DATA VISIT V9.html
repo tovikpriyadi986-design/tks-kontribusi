@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YOGYA CIANJUR - FULL GSHEET V13</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>body{font-family:Inter,system-ui}</style>
+</head>
+<body class="bg-gray-100">
+<header class="bg-white shadow sticky top-0 z-20">
+<div class="px-3 py-3">
+<h1 class="font-extrabold text-sm">DATA MANPOWER FOOD - YOGYA CIANJUR</h1>
+<p class="text-[11px] text-green-600 font-bold">V13 FULL GSHEET - No Input, 100% dari Google Sheet lu</p>
+</div>
+</header>
+
+<main class="p-2 max-w-7xl mx-auto">
+<div class="bg-white rounded-xl p-3 shadow-sm mb-3">
+<div class="flex gap-2">
+<button onclick="load()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1">🔄 Sync dari Google Sheet</button>
+<button onclick="document.getElementById('colBox').classList.toggle('hidden')" class="bg-gray-100 border px-3 py-2 rounded-lg text-xs font-bold">📊 Kolom ▼</button>
+</div>
+<div id="status" class="text-[11px] font-bold mt-2">Menunggu sync...</div>
+<div id="colBox" class="hidden mt-3 grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl">
+<label class="p-2 bg-white border rounded-lg"><input type="checkbox" checked id="cNama" onchange="render()"> NAMA</label>
+<label class="p-2 bg-white border rounded-lg"><input type="checkbox" checked id="cBrand" onchange="render()"> BRAND</label>
+<label class="p-2 bg-white border rounded-lg"><input type="checkbox" checked id="cHari" onchange="render()"> HARI VISIT</label>
+<label class="p-2 bg-white border rounded-lg"><input type="checkbox" checked id="cTo" onchange="render()"> SALES TO</label>
+<label class="p-2 bg-white border rounded-lg"><input type="checkbox" id="cToLy" onchange="render()"> TO LY</label>
+<label class="p-2 bg-white border rounded-lg"><input type="checkbox" checked id="cGrowth" onchange="render()"> GROWTH</label>
+<label class="p-2 bg-white border rounded-lg"><input type="checkbox" checked id="cKont" onchange="render()"> KONTRIBUSI</label>
+</div>
+</div>
+
+<div class="bg-white rounded-xl p-3 shadow-sm mb-3">
+<input id="q" onkeyup="render()" placeholder="Cari NAMA / BRAND / HARI VISIT..." class="w-full px-3 py-3 border-2 border-blue-100 rounded-xl text-sm">
+</div>
+
+<div class="grid grid-cols-3 gap-2 mb-3">
+<div class="bg-white p-3 rounded-xl shadow-sm text-center"><p class="text-[10px] text-gray-500 font-bold">TOTAL NAMA</p><p id="totNama" class="font-extrabold">0</p></div>
+<div class="bg-white p-3 rounded-xl shadow-sm text-center"><p class="text-[10px] text-gray-500 font-bold">TOTAL SALES TO</p><p id="totTo" class="font-extrabold text-xs">0</p></div>
+<div class="bg-white p-3 rounded-xl shadow-sm text-center"><p class="text-[10px] text-gray-500 font-bold">TOTAL BRAND</p><p id="totBrand" class="font-extrabold">0</p></div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-[12px] min-w-[700px]">
+<thead class="bg-[#00B0F0] font-bold"><tr>
+<th class="p-2">No</th>
+<th class="p-2 text-left cNama">NAMA</th>
+<th class="p-2 text-left cBrand">BRAND</th>
+<th class="p-2 text-left cHari">HARI VISIT</th>
+<th class="p-2 text-right cTo">SALES TO</th>
+<th class="p-2 text-right cToLy">TO LY</th>
+<th class="p-2 text-center cGrowth">GROWTH</th>
+<th class="p-2 text-center cKont">KONTRIBUSI</th>
+</tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+</div>
+
+<div id="cards" class="mt-3 grid gap-2 md:hidden"></div>
+<div class="mt-3 bg-white rounded-xl p-3 shadow-sm">
+<h4 class="font-bold text-xs mb-2">Summary Kontribusi per NAMA (dari Sheet)</h4>
+<div id="summary" class="text-[11px]"></div>
+</div>
+</main>
+
+<script>
+let grouped = {};
+let totalSalesTo = 0;
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQcw_VWQ9-Z2JU87wyKKSruf5p6ZDZgfk3IDTFjt0p-r_NI0h9zcOjx8IQDy9c-UlLUN5JmTm-ggKDi/pub?output=csv";
+
+function parseCSV(t){
+  const rows=[]; let row=[], cur='', inQ=false;
+  for(let i=0;i<t.length;i++){
+    let c=t[i];
+    if(c=='"'){ if(t[i+1]=='"'){cur+='"'; i++;} else inQ=!inQ; }
+    else if(c==',' && !inQ){row.push(cur); cur='';}
+    else if((c=='\n'||c=='\r') && !inQ){ if(cur!==''||row.length>0){row.push(cur); rows.push(row); row=[]; cur='';} }
+    else cur+=c;
+  }
+  if(cur!==''||row.length>0){row.push(cur); rows.push(row);}
+  return rows;
+}
+
+function load(){
+  document.getElementById('status').innerText='Syncing dari Google Sheet lu...';
+  fetch(CSV_URL).then(r=>r.text()).then(proses).catch(()=>{
+    fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses).catch(e=>{
+      document.getElementById('status').innerText='Gagal sync, coba refresh. Pastikan sheet sudah dipublish.';
+    });
+  });
+}
+
+function proses(txt){
+  const rows = parseCSV(txt);
+  if(rows.length<2){ document.getElementById('status').innerText='Sheet kosong'; return; }
+  
+  const header = rows[0].map(h=>h.toLowerCase().trim());
+  console.log('Header:', header);
+  
+  let idxTo = header.indexOf('sales to'); if(idxTo==-1) idxTo=7;
+  let idxToLy = header.indexOf('sales to ly'); if(idxToLy==-1) idxToLy=8;
+  let idxNama = header.indexOf('nama'); if(idxNama==-1) idxNama=11;
+  let idxBrand = header.indexOf('brand'); if(idxBrand==-1) idxBrand=12;
+  let idxHari = header.findIndex(h=>h.includes('hari') || h.includes('visit')); if(idxHari==-1) idxHari=13;
+  
+  grouped={}; totalSalesTo=0;
+  
+  for(let i=1;i<rows.length;i++){
+    const r=rows[i];
+    if(!r || r.length <= idxNama) continue;
+    
+    let nama = (r[idxNama]||'').replace(/"/g,'').trim().toUpperCase();
+    if(!nama || nama==='NAMA' || nama.length<2) continue;
+    
+    let brand = (r[idxBrand]||'').replace(/"/g,'').trim().toUpperCase();
+    let hari = (r[idxHari]||'').replace(/"/g,'').trim();
+    
+    let to = parseFloat((r[idxTo]||'0').toString().replace(/[^0-9.-]/g,''))||0;
+    let toLy = parseFloat((r[idxToLy]||'0').toString().replace(/[^0-9.-]/g,''))||0;
+    
+    // Key grouping by NAMA + BRAND (karena 1 orang bisa pegang 2 brand, kalau mau pisah)
+    let key = nama + '|' + brand;
+    if(!grouped[key]){
+      grouped[key] = {nama:nama, brand:brand, hariSet:new Set(), salesTo:0, salesToLy:0};
+    }
+    grouped[key].salesTo += to;
+    grouped[key].salesToLy += toLy;
+    if(hari) grouped[key].hariSet.add(hari);
+    totalSalesTo += to;
+  }
+  
+  document.getElementById('status').innerText='✅ Berhasil sync: '+Object.keys(grouped).length+' data manpower dari Sheet. Total TO: '+totalSalesTo.toLocaleString();
+  render();
+}
+
+function render(){
+  const q = document.getElementById('q').value.toLowerCase();
+  const showNama = document.getElementById('cNama').checked;
+  const showBrand = document.getElementById('cBrand').checked;
+  const showHari = document.getElementById('cHari').checked;
+  const showTo = document.getElementById('cTo').checked;
+  const showToLy = document.getElementById('cToLy').checked;
+  const showGrowth = document.getElementById('cGrowth').checked;
+  const showKont = document.getElementById('cKont').checked;
+  
+  document.querySelectorAll('.cNama').forEach(e=>e.classList.toggle('hidden',!showNama));
+  document.querySelectorAll('.cBrand').forEach(e=>e.classList.toggle('hidden',!showBrand));
+  document.querySelectorAll('.cHari').forEach(e=>e.classList.toggle('hidden',!showHari));
+  document.querySelectorAll('.cTo').forEach(e=>e.classList.toggle('hidden',!showTo));
+  document.querySelectorAll('.cToLy').forEach(e=>e.classList.toggle('hidden',!showToLy));
+  document.querySelectorAll('.cGrowth').forEach(e=>e.classList.toggle('hidden',!showGrowth));
+  document.querySelectorAll('.cKont').forEach(e=>e.classList.toggle('hidden',!showKont));
+  
+  let list = Object.values(grouped).map(g=>{
+    return {
+      nama:g.nama,
+      brand:g.brand,
+      hari: Array.from(g.hariSet).join(', '),
+      salesTo:g.salesTo,
+      salesToLy:g.salesToLy
+    };
+  });
+  
+  list = list.filter(d=>{
+    if(!q) return true;
+    return d.nama.toLowerCase().includes(q) || d.brand.toLowerCase().includes(q) || d.hari.toLowerCase().includes(q);
+  });
+  
+  list.sort((a,b)=>b.salesTo-a.salesTo);
+  
+  document.getElementById('totNama').innerText = new Set(list.map(x=>x.nama)).size;
+  document.getElementById('totBrand').innerText = new Set(list.map(x=>x.brand)).size;
+  document.getElementById('totTo').innerText = totalSalesTo.toLocaleString();
+  
+  document.getElementById('tbody').innerHTML = list.map((d,i)=>{
+    const growth = d.salesToLy===0 ? 0 : ((d.salesTo-d.salesToLy)/d.salesToLy*100);
+    const kont = totalSalesTo===0 ? 0 : (d.salesTo/totalSalesTo*100);
+    return `<tr class="border-b hover:bg-blue-50">
+      <td class="p-2">${i+1}</td>
+      <td class="p-2 font-bold cNama">${d.nama}</td>
+      <td class="p-2 cBrand"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">${d.brand||'-'}</span></td>
+      <td class="p-2 cHari text-[11px]">${d.hari||'-'}</td>
+      <td class="p-2 text-right cTo">${d.salesTo.toLocaleString()}</td>
+      <td class="p-2 text-right cToLy text-gray-500">${d.salesToLy.toLocaleString()}</td>
+      <td class="p-2 text-center cGrowth font-bold ${growth>=0?'text-green-600':'text-red-600'}">${growth.toFixed(2)}%</td>
+      <td class="p-2 text-center cKont font-bold text-blue-600">${kont.toFixed(2)}%</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan=8 class="p-6 text-center text-gray-400">Belum ada data, pastikan kolom L NAMA dan M BRAND di Sheet sudah terisi semua</td></tr>';
+  
+  // Cards HP
+  document.getElementById('cards').innerHTML = list.map((d,i)=>{
+    const growth = d.salesToLy===0 ? 0 : ((d.salesTo-d.salesToLy)/d.salesToLy*100);
+    const kont = totalSalesTo===0 ? 0 : (d.salesTo/totalSalesTo*100);
+    return `<div class="bg-white rounded-xl p-3 shadow-sm">
+      <div class="flex justify-between"><b class="text-sm">${i+1}. ${d.nama}</b><b class="text-blue-600">${kont.toFixed(2)}%</b></div>
+      <div class="text-[11px] mt-1 flex gap-2 flex-wrap">
+        <span class="bg-blue-50 px-2 py-1 rounded-full">${d.brand||'No Brand'}</span>
+        <span class="bg-yellow-50 px-2 py-1 rounded-full">${d.hari||'No Hari'}</span>
+        <span class="${growth>=0?'text-green-600':'text-red-600'} font-bold">${growth.toFixed(2)}% growth</span>
+      </div>
+      <div class="text-[10px] text-gray-400 mt-1">TO: ${d.salesTo.toLocaleString()} | TO LY: ${d.salesToLy.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+  
+  // Summary
+  let summaryMap = {};
+  list.forEach(d=>{
+    if(!summaryMap[d.nama]) summaryMap[d.nama]={to:0, toly:0};
+    summaryMap[d.nama].to+=d.salesTo;
+    summaryMap[d.nama].toly+=d.salesToLy;
+  });
+  let akum=0;
+  let summaryHtml = Object.entries(summaryMap).map(([nama,val])=>{
+    const growth = val.toly===0?0:((val.to-val.toly)/val.toly*100);
+    const kont = totalSalesTo===0?0:(val.to/totalSalesTo*100);
+    akum+=kont;
+    return `<div class="flex justify-between py-1 border-b"><span><b>${nama}</b> (${val.to.toLocaleString()})</span><span><span class="${growth>=0?'text-green-600':'text-red-600'}">${growth.toFixed(1)}%</span> | <b class="text-blue-600">${kont.toFixed(1)}%</b> (Akum ${akum.toFixed(1)}%)</span></div>`;
+  }).join('');
+  document.getElementById('summary').innerHTML = summaryHtml || 'Kosong';
+}
+
+window.onload=()=>{
+  load();
+  setTimeout(render,1000);
+}
+</script>
+</body>
+</html>
