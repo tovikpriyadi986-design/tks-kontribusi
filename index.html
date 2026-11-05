@@ -3,29 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - MANPOWER V15 FIX</title>
+<title>YOGYA CIANJUR - V16 AUTO</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100">
 <header class="bg-white shadow p-3 sticky top-0 z-20">
 <h1 class="font-extrabold text-sm">POWER FOOD - YOGYA CIANJUR</h1>
-<p class="text-[11px] text-green-600 font-bold">V15 FIX - Header & Isi Kolom Beneran Hide | Full GSheet</p>
+<p class="text-[11px] text-green-600 font-bold">V16 FIX AUTO SYNC - Kolom Hide Beneran 100%</p>
 </header>
 
 <main class="p-2 max-w-7xl mx-auto">
 <div class="bg-white rounded-xl p-3 shadow-sm mb-3">
 <div class="flex gap-2">
-<button onclick="load()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1">🔄 Sync dari Google Sheet</button>
+<button onclick="load()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1">🔄 Sync dari Google Sheet (Klik kalau 0)</button>
 <button onclick="document.getElementById('colBox').classList.toggle('hidden')" class="bg-gray-100 border px-3 py-2 rounded-lg text-xs font-bold">📊 Kolom ▼</button>
 </div>
-<div id="status" class="text-[11px] font-bold mt-2">Siap sync...</div>
+<div id="status" class="text-[11px] font-bold mt-2 p-2 bg-yellow-50 rounded">Memuat otomatis dari Sheet...</div>
 <div id="colBox" class="mt-3 grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border">
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cNama" onchange="render()"> NAMA</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cBrand" onchange="render()"> BRAND</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cHari" onchange="render()"> HARI VISIT</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cTo" onchange="render()"> SALES TO</label>
-<label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" id="cToLy" onchange="render()"> TO LY</label>
+<label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cToLy" onchange="render()"> TO LY</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cGrowth" onchange="render()"> GROWTH</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cKont" onchange="render()"> KONTRIBUSI</label>
 </div>
@@ -44,28 +44,20 @@
 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-3">
 <div class="overflow-x-auto">
 <table class="w-full text-[12px]">
-<thead class="bg-[#00B0F0] font-bold"><tr id="thead"></tr></thead>
-<tbody id="tbody"></tbody>
+<thead class="bg-[#00B0F0] font-bold"><tr id="thead"><th class="p-2">Loading...</th></tr></thead>
+<tbody id="tbody"><tr><td class="p-4 text-center">Sedang sync dari Google Sheet lu...</td></tr></tbody>
 </table>
 </div>
 </div>
 
 <div class="grid md:grid-cols-2 gap-3">
 <div id="boxKont" class="bg-white rounded-xl p-3 shadow-sm">
-<div class="flex justify-between items-center mb-2">
-<h4 class="font-bold text-xs">📊 Diagram Kontribusi per NAMA</h4>
-<button onclick="downloadChart('chartKont')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">📥 PNG</button>
-</div>
-<canvas id="chartKont" height="200"></canvas>
-<div id="summaryKont" class="text-[11px] mt-3"></div>
+<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📊 Diagram Kontribusi</h4><button onclick="downloadChart('chartKont')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
+<canvas id="chartKont" height="200"></canvas><div id="summaryKont" class="text-[11px] mt-3"></div>
 </div>
 <div id="boxGrowth" class="bg-white rounded-xl p-3 shadow-sm">
-<div class="flex justify-between items-center mb-2">
-<h4 class="font-bold text-xs">📈 Diagram Growth per NAMA</h4>
-<button onclick="downloadChart('chartGrowth')" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded">📥 PNG</button>
-</div>
-<canvas id="chartGrowth" height="200"></canvas>
-<div id="summaryGrowth" class="text-[11px] mt-3"></div>
+<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📈 Diagram Growth</h4><button onclick="downloadChart('chartGrowth')" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
+<canvas id="chartGrowth" height="200"></canvas><div id="summaryGrowth" class="text-[11px] mt-3"></div>
 </div>
 </div>
 </main>
@@ -77,13 +69,19 @@ const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQcw_VWQ9-Z2JU87w
 function parseCSV(t){const rows=[];let row=[],cur='',inQ=false;for(let i=0;i<t.length;i++){let c=t[i];if(c=='"'){if(t[i+1]=='"'){cur+='"';i++;}else inQ=!inQ;}else if(c==','&&!inQ){row.push(cur);cur='';}else if((c=='\n'||c=='\r')&&!inQ){if(cur!==''||row.length>0){row.push(cur);rows.push(row);row=[];cur='';}}else cur+=c;}if(cur!==''||row.length>0){row.push(cur);rows.push(row);}return rows;}
 function downloadChart(id){const c=document.getElementById(id);const a=document.createElement('a');a.download=id+'_'+(document.getElementById('q').value||'ALL')+'.png';a.href=c.toDataURL('image/png');a.click();}
 function load(){
- document.getElementById('status').innerText='Syncing...';
- fetch(CSV_URL).then(r=>r.text()).then(proses).catch(()=>{
-  fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses);
+ document.getElementById('status').innerText='🔄 Syncing dari Google Sheet...';
+ document.getElementById('status').className='text-[11px] font-bold mt-2 p-2 bg-blue-50 rounded text-blue-600';
+ fetch(CSV_URL).then(r=>{if(!r.ok) throw 'fail'; return r.text();}).then(proses).catch(()=>{
+  document.getElementById('status').innerText='⏳ Coba via proxy...';
+  fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses).catch(e=>{
+    document.getElementById('status').innerText='❌ Gagal load Sheet, cek koneksi atau klik Sync lagi. Error: '+e;
+  });
  });
 }
 function proses(txt){
+ if(!txt){document.getElementById('status').innerText='❌ Sheet kosong'; return;}
  const rows=parseCSV(txt);
+ if(rows.length<2){document.getElementById('status').innerText='❌ Format Sheet salah'; return;}
  const header=rows[0].map(h=>h.toLowerCase().trim());
  let idxTo=header.indexOf('sales to'); if(idxTo==-1) idxTo=7;
  let idxToLy=header.indexOf('sales to ly'); if(idxToLy==-1) idxToLy=8;
@@ -93,18 +91,20 @@ function proses(txt){
  grouped={}; totalSalesTo=0;
  for(let i=1;i<rows.length;i++){
   const r=rows[i]; if(!r||r.length<=idxNama) continue;
-  let nama=(r[idxNama]||'').replace(/"/g,'').trim().toUpperCase(); if(!nama||nama==='NAMA') continue;
+  let nama=(r[idxNama]||'').replace(/"/g,'').trim().toUpperCase(); if(!nama||nama==='NAMA'||nama==='') continue;
   let brand=(r[idxBrand]||'').replace(/"/g,'').trim().toUpperCase();
   let hari=(r[idxHari]||'').replace(/"/g,'').trim();
   let to=parseFloat((r[idxTo]||'0').toString().replace(/[^0-9.-]/g,''))||0;
   let toLy=parseFloat((r[idxToLy]||'0').toString().replace(/[^0-9.-]/g,''))||0;
+  if(to===0 && toLy===0) continue;
   let key=nama+'|'+brand;
   if(!grouped[key]) grouped[key]={nama,brand,hariSet:new Set(),salesTo:0,salesToLy:0};
   grouped[key].salesTo+=to; grouped[key].salesToLy+=toLy;
   if(hari) grouped[key].hariSet.add(hari);
   totalSalesTo+=to;
  }
- document.getElementById('status').innerText='✅ OK: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString();
+ document.getElementById('status').innerText='✅ Berhasil sync: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString();
+ document.getElementById('status').className='text-[11px] font-bold mt-2 p-2 bg-green-50 rounded text-green-700';
  render();
 }
 function render(){
@@ -118,8 +118,6 @@ function render(){
   GROWTH: document.getElementById('cGrowth').checked,
   KONT: document.getElementById('cKont').checked
  };
- 
- // === INI FIX NYA BANG: BIKIN HEADER DINAMIS SESUAI CHECKBOX ===
  let headHtml = '<th class="p-2">No</th>';
  if(show.NAMA) headHtml+='<th class="p-2 text-left">NAMA</th>';
  if(show.BRAND) headHtml+='<th class="p-2 text-left">BRAND</th>';
@@ -137,11 +135,15 @@ function render(){
  list=list.filter(d=>!q||d.nama.toLowerCase().includes(q)||d.brand.toLowerCase().includes(q)||d.hari.toLowerCase().includes(q));
  list.sort((a,b)=>b.salesTo-a.salesTo);
 
- document.getElementById('totNama').innerText=new Set(list.map(x=>x.nama)).size;
+ document.getElementById('totNama').innerText=new Set(list.map(x=>x.nama)).size || Object.keys(grouped).length;
  document.getElementById('totBrand').innerText=new Set(list.map(x=>x.brand)).size;
- document.getElementById('totTo').innerText=totalSalesTo.toLocaleString();
+ document.getElementById('totTo').innerText=(list.reduce((s,x)=>s+x.salesTo,0) || totalSalesTo).toLocaleString();
 
- // === FIX JUGA ISI TABEL DINAMIS ===
+ if(list.length===0){
+   document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="p-4 text-center">Tidak ada data. Klik Sync atau kosongkan pencarian.</td></tr>';
+   return;
+ }
+
  document.getElementById('tbody').innerHTML=list.map((d,i)=>{
   const growth=d.salesToLy===0?0:((d.salesTo-d.salesToLy)/d.salesToLy*100);
   const kont=totalSalesTo===0?0:(d.salesTo/totalSalesTo*100);
@@ -157,7 +159,6 @@ function render(){
   return row;
  }).join('');
 
- // Charts
  const labels=list.map(d=>d.nama);
  const dataKont=list.map(d=> totalSalesTo===0?0:(d.salesTo/totalSalesTo*100));
  const dataGrowth=list.map(d=> d.salesToLy===0?0:((d.salesTo-d.salesToLy)/d.salesToLy*100));
@@ -167,11 +168,6 @@ function render(){
   chartKontInstance=new Chart(ctxKont,{type:'pie',data:{labels:labels,[STRIPPED]
     options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}}
   );
-  let akum=0;
-  document.getElementById('summaryKont').innerHTML=list.map((d,i)=>{
-    const kont=dataKont[i]; akum+=kont;
-    return `<div class="flex justify-between py-1 border-b"><span><b>${d.nama}</b> (${d.salesTo.toLocaleString()})</span><span class="text-blue-600 font-bold">${kont.toFixed(1)}% (Akum ${akum.toFixed(1)}%)</span></div>`;
-  }).join('');
  }
  if(show.GROWTH){
   const ctxGrowth=document.getElementById('chartGrowth').getContext('2d');
@@ -179,13 +175,12 @@ function render(){
   chartGrowthInstance=new Chart(ctxGrowth,{type:'bar',data:{labels:labels,[STRIPPED] %',data:dataGrowth,[STRIPPED]
     options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}
   });
-  document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{
-    const growth=dataGrowth[i];
-    return `<div class="flex justify-between py-1 border-b"><span><b>${d.nama}</b></span><span class="${growth>=0?'text-green-600':'text-red-600'} font-bold">${growth.toFixed(1)}% | TO ${d.salesTo.toLocaleString()}</span></div>`;
-  }).join('');
  }
 }
-window.onload=()=>{load();}
+// AUTO LOAD 2 KALI BIAR PASTI MUNCUL DI HP
+setTimeout(load, 500);
+setTimeout(load, 2000);
+window.onload=()=>{load();};
 </script>
 </body>
 </html>
