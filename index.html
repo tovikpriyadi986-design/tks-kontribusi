@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - MANPOWER V14 DIAGRAM</title>
+<title>YOGYA CIANJUR - MANPOWER V15 FIX</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100">
 <header class="bg-white shadow p-3 sticky top-0 z-20">
 <h1 class="font-extrabold text-sm">POWER FOOD - YOGYA CIANJUR</h1>
-<p class="text-[11px] text-green-600 font-bold">V14 - Kolom Hide + Diagram Filter + Download PNG | Full GSheet</p>
+<p class="text-[11px] text-green-600 font-bold">V15 FIX - Header & Isi Kolom Beneran Hide | Full GSheet</p>
 </header>
 
 <main class="p-2 max-w-7xl mx-auto">
@@ -20,7 +20,7 @@
 <button onclick="document.getElementById('colBox').classList.toggle('hidden')" class="bg-gray-100 border px-3 py-2 rounded-lg text-xs font-bold">📊 Kolom ▼</button>
 </div>
 <div id="status" class="text-[11px] font-bold mt-2">Siap sync...</div>
-<div id="colBox" class="hidden mt-3 grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border">
+<div id="colBox" class="mt-3 grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border">
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cNama" onchange="render()"> NAMA</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cBrand" onchange="render()"> BRAND</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cHari" onchange="render()"> HARI VISIT</label>
@@ -32,7 +32,7 @@
 </div>
 
 <div class="bg-white rounded-xl p-3 shadow-sm mb-3">
-<input id="q" onkeyup="render()" placeholder="Cari NAMA / BRAND / HARI VISIT... ketik RAMDAN = diagram cuma RAMDAN" class="w-full px-3 py-3 border-2 border-blue-100 rounded-xl text-sm">
+<input id="q" onkeyup="render()" placeholder="Cari NAMA / BRAND... ketik RAMDAN = diagram cuma RAMDAN" class="w-full px-3 py-3 border-2 border-blue-100 rounded-xl text-sm">
 </div>
 
 <div class="grid grid-cols-3 gap-2 mb-3">
@@ -43,23 +43,13 @@
 
 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-3">
 <div class="overflow-x-auto">
-<table class="w-full text-[12px] min-w-[700px]">
-<thead class="bg-[#00B0F0] font-bold"><tr>
-<th class="p-2">No</th>
-<th class="p-2 text-left col-NAMA">NAMA</th>
-<th class="p-2 text-left col-BRAND">BRAND</th>
-<th class="p-2 text-left col-HARI">HARI VISIT</th>
-<th class="p-2 text-right col-TO">SALES TO</th>
-<th class="p-2 text-right col-TOLY">TO LY</th>
-<th class="p-2 text-center col-GROWTH">GROWTH</th>
-<th class="p-2 text-center col-KONT">KONTRIBUSI</th>
-</tr></thead>
+<table class="w-full text-[12px]">
+<thead class="bg-[#00B0F0] font-bold"><tr id="thead"></tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
 </div>
 
-<!-- DIAGRAM -->
 <div class="grid md:grid-cols-2 gap-3">
 <div id="boxKont" class="bg-white rounded-xl p-3 shadow-sm">
 <div class="flex justify-between items-center mb-2">
@@ -87,7 +77,7 @@ const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQcw_VWQ9-Z2JU87w
 function parseCSV(t){const rows=[];let row=[],cur='',inQ=false;for(let i=0;i<t.length;i++){let c=t[i];if(c=='"'){if(t[i+1]=='"'){cur+='"';i++;}else inQ=!inQ;}else if(c==','&&!inQ){row.push(cur);cur='';}else if((c=='\n'||c=='\r')&&!inQ){if(cur!==''||row.length>0){row.push(cur);rows.push(row);row=[];cur='';}}else cur+=c;}if(cur!==''||row.length>0){row.push(cur);rows.push(row);}return rows;}
 function downloadChart(id){const c=document.getElementById(id);const a=document.createElement('a');a.download=id+'_'+(document.getElementById('q').value||'ALL')+'.png';a.href=c.toDataURL('image/png');a.click();}
 function load(){
- document.getElementById('status').innerText='Syncing dari Google Sheet lu...';
+ document.getElementById('status').innerText='Syncing...';
  fetch(CSV_URL).then(r=>r.text()).then(proses).catch(()=>{
   fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses);
  });
@@ -114,7 +104,7 @@ function proses(txt){
   if(hari) grouped[key].hariSet.add(hari);
   totalSalesTo+=to;
  }
- document.getElementById('status').innerText='✅ Berhasil sync: '+Object.keys(grouped).length+' data manpower. Total TO: '+totalSalesTo.toLocaleString();
+ document.getElementById('status').innerText='✅ OK: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString();
  render();
 }
 function render(){
@@ -128,13 +118,18 @@ function render(){
   GROWTH: document.getElementById('cGrowth').checked,
   KONT: document.getElementById('cKont').checked
  };
- document.querySelectorAll('.col-NAMA').forEach(e=>e.classList.toggle('hidden',!show.NAMA));
- document.querySelectorAll('.col-BRAND').forEach(e=>e.classList.toggle('hidden',!show.BRAND));
- document.querySelectorAll('.col-HARI').forEach(e=>e.classList.toggle('hidden',!show.HARI));
- document.querySelectorAll('.col-TO').forEach(e=>e.classList.toggle('hidden',!show.TO));
- document.querySelectorAll('.col-TOLY').forEach(e=>e.classList.toggle('hidden',!show.TOLY));
- document.querySelectorAll('.col-GROWTH').forEach(e=>e.classList.toggle('hidden',!show.GROWTH));
- document.querySelectorAll('.col-KONT').forEach(e=>e.classList.toggle('hidden',!show.KONT));
+ 
+ // === INI FIX NYA BANG: BIKIN HEADER DINAMIS SESUAI CHECKBOX ===
+ let headHtml = '<th class="p-2">No</th>';
+ if(show.NAMA) headHtml+='<th class="p-2 text-left">NAMA</th>';
+ if(show.BRAND) headHtml+='<th class="p-2 text-left">BRAND</th>';
+ if(show.HARI) headHtml+='<th class="p-2 text-left">HARI VISIT</th>';
+ if(show.TO) headHtml+='<th class="p-2 text-right">SALES TO</th>';
+ if(show.TOLY) headHtml+='<th class="p-2 text-right">TO LY</th>';
+ if(show.GROWTH) headHtml+='<th class="p-2 text-center">GROWTH</th>';
+ if(show.KONT) headHtml+='<th class="p-2 text-center">KONTRIBUSI</th>';
+ document.getElementById('thead').innerHTML=headHtml;
+
  document.getElementById('boxKont').classList.toggle('hidden',!show.KONT);
  document.getElementById('boxGrowth').classList.toggle('hidden',!show.GROWTH);
 
@@ -146,31 +141,30 @@ function render(){
  document.getElementById('totBrand').innerText=new Set(list.map(x=>x.brand)).size;
  document.getElementById('totTo').innerText=totalSalesTo.toLocaleString();
 
+ // === FIX JUGA ISI TABEL DINAMIS ===
  document.getElementById('tbody').innerHTML=list.map((d,i)=>{
   const growth=d.salesToLy===0?0:((d.salesTo-d.salesToLy)/d.salesToLy*100);
   const kont=totalSalesTo===0?0:(d.salesTo/totalSalesTo*100);
-  return `<tr class="border-b hover:bg-blue-50">
-    <td class="p-2">${i+1}</td>
-    <td class="p-2 font-bold col-NAMA">${d.nama}</td>
-    <td class="p-2 col-BRAND"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">${d.brand||'-'}</span></td>
-    <td class="p-2 col-HARI text-[11px]">${d.hari||'-'}</td>
-    <td class="p-2 text-right col-TO">${d.salesTo.toLocaleString()}</td>
-    <td class="p-2 text-right col-TOLY text-gray-500">${d.salesToLy.toLocaleString()}</td>
-    <td class="p-2 text-center col-GROWTH font-bold ${growth>=0?'text-green-600':'text-red-600'}">${growth.toFixed(2)}%</td>
-    <td class="p-2 text-center col-KONT font-bold text-blue-600">${kont.toFixed(2)}%</td>
-  </tr>`;
+  let row=`<tr class="border-b hover:bg-blue-50"><td class="p-2">${i+1}</td>`;
+  if(show.NAMA) row+=`<td class="p-2 font-bold">${d.nama}</td>`;
+  if(show.BRAND) row+=`<td class="p-2"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">${d.brand||'-'}</span></td>`;
+  if(show.HARI) row+=`<td class="p-2 text-[11px]">${d.hari||'-'}</td>`;
+  if(show.TO) row+=`<td class="p-2 text-right">${d.salesTo.toLocaleString()}</td>`;
+  if(show.TOLY) row+=`<td class="p-2 text-right text-gray-500">${d.salesToLy.toLocaleString()}</td>`;
+  if(show.GROWTH) row+=`<td class="p-2 text-center font-bold ${growth>=0?'text-green-600':'text-red-600'}">${growth.toFixed(2)}%</td>`;
+  if(show.KONT) row+=`<td class="p-2 text-center font-bold text-blue-600">${kont.toFixed(2)}%</td>`;
+  row+='</tr>';
+  return row;
  }).join('');
 
+ // Charts
  const labels=list.map(d=>d.nama);
  const dataKont=list.map(d=> totalSalesTo===0?0:(d.salesTo/totalSalesTo*100));
  const dataGrowth=list.map(d=> d.salesToLy===0?0:((d.salesTo-d.salesToLy)/d.salesToLy*100));
-
  if(show.KONT){
   const ctxKont=document.getElementById('chartKont').getContext('2d');
   if(chartKontInstance) chartKontInstance.destroy();
-  chartKontInstance=new Chart(ctxKont,{
-    type:'pie',
-    data:{labels:labels,datasets:[{data:dataKont,backgroundColor:['#2563eb','#f59e0b','#10b981','#ec4899','#8b5cf6']}]},
+  chartKontInstance=new Chart(ctxKont,{type:'pie',data:{labels:labels,[STRIPPED]
     options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}}
   );
   let akum=0;
@@ -182,9 +176,7 @@ function render(){
  if(show.GROWTH){
   const ctxGrowth=document.getElementById('chartGrowth').getContext('2d');
   if(chartGrowthInstance) chartGrowthInstance.destroy();
-  chartGrowthInstance=new Chart(ctxGrowth,{
-    type:'bar',
-    data:{labels:labels,datasets:[{label:'Growth %',data:dataGrowth,backgroundColor:dataGrowth.map(v=>v>=0?'#16a34a':'#dc2626')}]},
+  chartGrowthInstance=new Chart(ctxGrowth,{type:'bar',data:{labels:labels,[STRIPPED] %',data:dataGrowth,[STRIPPED]
     options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}
   });
   document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{
