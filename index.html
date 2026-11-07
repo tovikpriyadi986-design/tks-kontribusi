@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - MANPOWER V16.3 FINAL</title>
+<title>YOGYA CIANJUR - MANPOWER V16.5 FINAL REAL</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100">
 <header class="bg-white shadow p-3 sticky top-0 z-20">
 <h1 class="font-extrabold text-sm">INDIVIDUAL SALES CONTRIBUTION - YCJ</h1>
-<p class="text-[11px] text-green-600 font-bold">FOOD - YOGYA CIANJUR - V16.3 FIX FINAL</p>
+<p class="text-[11px] text-green-600 font-bold">FOOD - YOGYA CIANJUR - V16.5 REAL CSV FIX</p>
 </header>
 <main class="p-2 max-w-7xl mx-auto">
 <div class="bg-white rounded-xl p-3 shadow-sm mb-3">
 <div class="flex gap-2">
-<button onclick="load()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1">🔄 Sync dari Google Sheet</button>
+<button onclick="load(true)" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1">🔄 Sync dari Google Sheet</button>
 <button onclick="document.getElementById('colBox').classList.toggle('hidden')" class="bg-gray-100 border px-3 py-2 rounded-lg text-xs font-bold">📊 Kolom ▼</button>
 </div>
-<div id="status" class="text-[11px] font-bold mt-2">Siap sync...</div>
+<div id="status" class="text-[11px] font-bold mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">⏳ Auto syncing REAL CSV...</div>
 <div id="colBox" class="hidden mt-3 grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border">
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cNama" onchange="render()"> NAMA</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cBrand" onchange="render()"> BRAND</label>
@@ -33,8 +33,8 @@
 <input id="q" onkeyup="render()" placeholder="Cari NAMA / BRAND / HARI VISIT..." class="w-full px-3 py-3 border-2 border-blue-100 rounded-xl text-sm">
 <div class="flex gap-2 mt-3">
 <button id="btnAll" onclick="setGrowthFilter('all')" class="flex-1 bg-blue-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold">Tampilkan Semua</button>
-<button id="btnMinus" onclick="setGrowthFilter('minus')" class="flex-1 bg-white border border-red-300 text-red-600 px-2 py-2 rounded-lg text-[11px] font-bold">📉 Growth MINUS Saja</button>
-<button id="btnPlus" onclick="setGrowthFilter('plus')" class="flex-1 bg-white border border-green-300 text-green-600 px-2 py-2 rounded-lg text-[11px] font-bold">📈 Growth PLUS Saja</button>
+<button id="btnMinus" onclick="setGrowthFilter('minus')" class="flex-1 bg-white border border-red-300 text-red-600 px-2 py-2 rounded-lg text-[11px] font-bold">📉 MINUS</button>
+<button id="btnPlus" onclick="setGrowthFilter('plus')" class="flex-1 bg-white border border-green-300 text-green-600 px-2 py-2 rounded-lg text-[11px] font-bold">📈 PLUS</button>
 </div>
 </div>
 <div class="grid grid-cols-3 gap-2 mb-3">
@@ -55,17 +55,17 @@
 <th class="p-2 text-center col-GROWTH cursor-pointer" onclick="sortBy('growth')">GROWTH <span id="arr-growth"></span></th>
 <th class="p-2 text-center col-KONT cursor-pointer" onclick="sortBy('kontribusi')">KONTRIBUSI <span id="arr-kontribusi"></span></th>
 </tr></thead>
-<tbody id="tbody"></tbody>
+<tbody id="tbody"><tr><td colspan="8" class="p-8 text-center text-gray-400">⏳ Loading data REAL...</td></tr></tbody>
 </table>
 </div>
 </div>
 <div class="grid md:grid-cols-2 gap-3">
 <div id="boxKont" class="bg-white rounded-xl p-3 shadow-sm">
-<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📊 Diagram Kontribusi per PIC</h4><button onclick="downloadChart('chartKont')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
+<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📊 Kontribusi per PIC</h4><button onclick="downloadChart('chartKont')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
 <canvas id="chartKont" height="200"></canvas><div id="summaryKont" class="text-[11px] mt-3"></div>
 </div>
 <div id="boxGrowth" class="bg-white rounded-xl p-3 shadow-sm">
-<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📈 Diagram Growth per PIC</h4><button onclick="downloadChart('chartGrowth')" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
+<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📈 Growth per PIC</h4><button onclick="downloadChart('chartGrowth')" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
 <canvas id="chartGrowth" height="200"></canvas><div id="summaryGrowth" class="text-[11px] mt-3"></div>
 </div>
 </div>
@@ -73,7 +73,7 @@
 <div id="modalDetail" class="hidden fixed inset-0 bg-black/50 z-[100] flex justify-center items-start pt-10 p-3">
   <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
     <div class="bg-[#00B0F0] text-white p-3 flex justify-between items-center">
-      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">SU Description + NODE | (TO - LY)/LY %</p></div>
+      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">SU Description + NODE | (TO-LY)/LY</p></div>
       <button onclick="closeModal()" class="bg-white text-black rounded-full w-8 h-8 font-bold">×</button>
     </div>
     <div id="modalBody" class="p-3 max-h-[70vh] overflow-y-auto text-[12px]"></div>
@@ -87,27 +87,37 @@ let growthFilter='all';
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQcw_VWQ9-Z2JU87wyKKSruf5p6ZDZgfk3IDTFjt0p-r_NI0h9zcOjx8IQDy9c-UlLUN5JmTm-ggKDi/pub?output=csv";
 function parseCSV(t){const rows=[];let row=[],cur='',inQ=false;for(let i=0;i<t.length;i++){let c=t[i];if(c=='"'){if(t[i+1]=='"'){cur+='"';i++;}else inQ=!inQ;}else if(c==','&&!inQ){row.push(cur);cur='';}else if((c=='\n'||c=='\r')&&!inQ){if(cur!==''||row.length>0){row.push(cur);rows.push(row);row=[];cur='';}}else cur+=c;}if(cur!==''||row.length>0){row.push(cur);rows.push(row);}return rows;}
 function downloadChart(id){const c=document.getElementById(id);const a=document.createElement('a');a.download=id+'.png';a.href=c.toDataURL('image/png');a.click();}
-function load(){
- document.getElementById('status').innerText='Syncing dari Google Sheet lu...';
- fetch(CSV_URL).then(r=>r.text()).then(proses).catch(()=>{
-  fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses);
+function load(isManual){
+ const statusEl=document.getElementById('status');
+ statusEl.innerHTML=isManual?'🔄 Manual sync...':'⏳ Auto syncing...';
+ fetch(CSV_URL,{mode:'cors'}).then(r=>{if(!r.ok) throw new Error('Direct HTTP '+r.status); return r.text();}).then(txt=>{
+   if(txt.includes('<html') || txt.length<100) throw new Error('Direct returned HTML');
+   proses(txt);
+ }).catch(e1=>{
+   statusEl.innerHTML='⚠️ Direct gagal ('+e1.message+')<br>🔄 Coba proxy 1...';
+   fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(txt=>{
+     if(txt.includes('<html') && txt.length<500) throw new Error('Proxy1 HTML');
+     proses(txt);
+   }).catch(e2=>{
+     statusEl.innerHTML='⚠️ Proxy1 gagal<br>🔄 Coba proxy 2...';
+     fetch('https://corsproxy.io/?'+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses).catch(e3=>{
+       statusEl.innerHTML='❌ Gagal semua!<br>Error: '+e1.message+' | '+e2.message+'<br><a href="'+CSV_URL+'" target="_blank" class="text-blue-600 underline">Coba buka CSV manual</a><br><br><button onclick="load(true)" class="bg-green-600 text-white px-4 py-2 rounded">Coba Lagi</button>';
+     });
+   });
  });
 }
 function proses(txt){
  const rows=parseCSV(txt);
  const header=rows[0].map(h=>h.toLowerCase().trim());
- let idxTo = header.indexOf('sales to');
- if(idxTo==-1) idxTo = header.findIndex(h=> h.includes('sales to') && !h.includes('ly'));
- if(idxTo==-1) idxTo = 7;
- let idxToLy = header.indexOf('sales to ly');
- if(idxToLy==-1) idxToLy = header.findIndex(h=> h.includes('sales to ly'));
- if(idxToLy==-1) idxToLy = 8;
- let idxNama = header.indexOf('nama'); if(idxNama==-1) idxNama=11;
- let idxBrand = header.indexOf('brand'); if(idxBrand==-1) idxBrand=12;
- let idxHari = header.findIndex(h=>h.includes('hari')||h.includes('visit')); if(idxHari==-1) idxHari=13;
- let idxSu = header.indexOf('su description'); if(idxSu==-1) idxSu=2;
- let idxNode = header.indexOf('node'); if(idxNode==-1) idxNode=0;
- let idxCode = header.indexOf('article code'); if(idxCode==-1) idxCode=1;
+ let idxNode = 0; let idxCode = 1; let idxSu = 2; let idxTo = 7; let idxToLy = 8; let idxNama = 11; let idxBrand = 12; let idxHari = 13;
+ let autoIdxTo = header.indexOf('sales to'); if(autoIdxTo!==-1) idxTo=autoIdxTo;
+ let autoIdxToLy = header.indexOf('sales to ly'); if(autoIdxToLy!==-1) idxToLy=autoIdxToLy;
+ let autoIdxNama = header.indexOf('nama'); if(autoIdxNama!==-1) idxNama=autoIdxNama;
+ let autoIdxBrand = header.indexOf('brand'); if(autoIdxBrand!==-1) idxBrand=autoIdxBrand;
+ let autoIdxHari = header.findIndex(h=>h.includes('hari')||h.includes('visit')); if(autoIdxHari!==-1) idxHari=autoIdxHari;
+ let autoIdxSu = header.indexOf('su description'); if(autoIdxSu!==-1) idxSu=autoIdxSu;
+ let autoIdxNode = header.indexOf('node'); if(autoIdxNode!==-1) idxNode=autoIdxNode;
+ let autoIdxCode = header.indexOf('article code'); if(autoIdxCode!==-1) idxCode=autoIdxCode;
  grouped={}; totalSalesTo=0;
  for(let i=1;i<rows.length;i++){
   const r=rows[i]; if(!r||r.length<=idxNama) continue;
@@ -130,7 +140,7 @@ function proses(txt){
   grouped[key].products[prodKey].salesToLy+=toLy;
   totalSalesTo+=to;
  }
- document.getElementById('status').innerText='✅ Berhasil sync: '+Object.keys(grouped).length+' data manpower. Total TO: '+totalSalesTo.toLocaleString()+' | TO col='+header[idxTo]+'('+idxTo+') LY col='+header[idxToLy]+'('+idxToLy+')';
+ document.getElementById('status').innerHTML='✅ Berhasil sync REAL CSV: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString()+'<br><small>Header: TO='+header[idxTo]+'('+idxTo+') LY='+header[idxToLy]+'('+idxToLy+') | Rows: '+(rows.length-1)+'</small>';
  render();
 }
 function sortBy(field){
@@ -195,27 +205,33 @@ function render(){
  document.getElementById('totNama').innerText=new Set(list.map(x=>x.nama)).size;
  document.getElementById('totBrand').innerText=new Set(list.map(x=>x.brand)).size;
  document.getElementById('totTo').innerText=list.reduce((s,x)=>s+x.salesTo,0).toLocaleString();
- document.getElementById('tbody').innerHTML=list.map((d,i)=>{
-  const growth=d.growth; const kont=d.kontribusi;
-  return '<tr class="border-b hover:bg-blue-50"><td class="p-2">'+(i+1)+'</td><td class="p-2 font-bold col-NAMA text-blue-600 underline cursor-pointer" onclick="showMinus(\''+d.key+'\')">'+d.nama+'</td><td class="p-2 col-BRAND"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">'+(d.brand||'-')+'</span></td><td class="p-2 col-HARI text-[11px]">'+(d.hari||'-')+'</td><td class="p-2 text-right col-TO">'+d.salesTo.toLocaleString()+'</td><td class="p-2 text-right col-TOLY text-gray-500">'+d.salesToLy.toLocaleString()+'</td><td class="p-2 text-center col-GROWTH font-bold '+(growth>=0?'text-green-600':'text-red-600')+'">'+growth.toFixed(2)+'%</td><td class="p-2 text-center col-KONT font-bold text-blue-600">'+kont.toFixed(2)+'%</td></tr>';
- }).join('');
+ if(list.length===0){
+   document.getElementById('tbody').innerHTML='<tr><td colspan="8" class="p-8 text-center text-gray-500">Data kosong</td></tr>';
+ } else {
+   document.getElementById('tbody').innerHTML=list.map((d,i)=>{
+    const growth=d.growth; const kont=d.kontribusi;
+    return '<tr class="border-b hover:bg-blue-50"><td class="p-2">'+(i+1)+'</td><td class="p-2 font-bold col-NAMA text-blue-600 underline cursor-pointer" onclick="showMinus(\''+d.key+'\')">'+d.nama+'</td><td class="p-2 col-BRAND"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">'+(d.brand||'-')+'</span></td><td class="p-2 col-HARI text-[11px]">'+(d.hari||'-')+'</td><td class="p-2 text-right col-TO">'+d.salesTo.toLocaleString()+'</td><td class="p-2 text-right col-TOLY text-gray-500">'+d.salesToLy.toLocaleString()+'</td><td class="p-2 text-center col-GROWTH font-bold '+(growth>=0?'text-green-600':'text-red-600')+'">'+growth.toFixed(2)+'%</td><td class="p-2 text-center col-KONT font-bold text-blue-600">'+kont.toFixed(2)+'%</td></tr>';
+   }).join('');
+ }
  const labels=list.map(d=>d.nama+' ('+d.brand+')');
  const dataKont=list.map(d=>d.kontribusi);
  const dataGrowth=list.map(d=>d.growth);
  if(show.KONT){
   const ctxKont=document.getElementById('chartKont').getContext('2d');
   if(chartKontInstance) chartKontInstance.destroy();
-  chartKontInstance=new Chart(ctxKont,{ type:'pie', data:{labels:labels,[STRIPPED] options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+  chartKontInstance=new Chart(ctxKont,{ type:'pie', data:{labels:labels, datasets:[{data:dataKont}]}, options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
   let akum=0; document.getElementById('summaryKont').innerHTML=list.map((d,i)=>{ const kont=dataKont[i]; akum+=kont; return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b> ('+d.salesTo.toLocaleString()+')</span><span class="text-blue-600 font-bold">'+kont.toFixed(1)+'% (Akum '+akum.toFixed(1)+'%)</span></div>'; }).join('');
  }
  if(show.GROWTH){
   const ctxGrowth=document.getElementById('chartGrowth').getContext('2d');
   if(chartGrowthInstance) chartGrowthInstance.destroy();
-  chartGrowthInstance=new Chart(ctxGrowth,{ type:'bar', data:{labels:labels,[STRIPPED] %',data:dataGrowth}]}, options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
+  chartGrowthInstance=new Chart(ctxGrowth,{ type:'bar', data:{labels:labels, datasets:[{label:'Growth %',data:dataGrowth}]}, options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
   document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{ const growth=dataGrowth[i]; return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b></span><span class="'+(growth>=0?'text-green-600':'text-red-600')+' font-bold">'+growth.toFixed(1)+'% | TO '+d.salesTo.toLocaleString()+'</span></div>'; }).join('');
  }
 }
-window.onload=()=>{load();}
+document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(()=>load(false), 500); });
+window.addEventListener('load', ()=>{ setTimeout(()=>load(false), 800); });
+setTimeout(()=>{ load(false); }, 1200);
 </script>
 </body>
 </html>
