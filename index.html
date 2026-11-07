@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - MANPOWER V14 DIAGRAM</title>
+<title>YOGYA CIANJUR - MANPOWER V16 FINAL</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100">
 <header class="bg-white shadow p-3 sticky top-0 z-20">
 <h1 class="font-extrabold text-sm">INDIVIDUAL SALES CONTRIBUTION - YCJ</h1>
-<p class="text-[11px] text-green-600 font-bold">FOOD - YOGYA CIANJUR</p>
+<p class="text-[11px] text-green-600 font-bold">FOOD - YOGYA CIANJUR - V16 FILTER + DETAIL MINUS</p>
 </header>
-
 <main class="p-2 max-w-7xl mx-auto">
 <div class="bg-white rounded-xl p-3 shadow-sm mb-3">
 <div class="flex gap-2">
@@ -30,68 +29,68 @@
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cKont" onchange="render()"> KONTRIBUSI</label>
 </div>
 </div>
-
 <div class="bg-white rounded-xl p-3 shadow-sm mb-3">
-<input id="q" onkeyup="render()" placeholder="Cari NAMA / BRAND / HARI VISIT... ketik RAMDAN = diagram cuma RAMDAN" class="w-full px-3 py-3 border-2 border-blue-100 rounded-xl text-sm">
+<input id="q" onkeyup="render()" placeholder="Cari NAMA / BRAND / HARI VISIT..." class="w-full px-3 py-3 border-2 border-blue-100 rounded-xl text-sm">
+<div class="flex gap-2 mt-3">
+<button id="btnAll" onclick="setGrowthFilter('all')" class="flex-1 bg-blue-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold">Tampilkan Semua</button>
+<button id="btnMinus" onclick="setGrowthFilter('minus')" class="flex-1 bg-white border border-red-300 text-red-600 px-2 py-2 rounded-lg text-[11px] font-bold">📉 Growth MINUS Saja</button>
+<button id="btnPlus" onclick="setGrowthFilter('plus')" class="flex-1 bg-white border border-green-300 text-green-600 px-2 py-2 rounded-lg text-[11px] font-bold">📈 Growth PLUS Saja</button>
 </div>
-
+</div>
 <div class="grid grid-cols-3 gap-2 mb-3">
 <div class="bg-white p-3 rounded-xl shadow-sm text-center"><p class="text-[10px] text-gray-500 font-bold">TOTAL NAMA</p><p id="totNama" class="font-extrabold">0</p></div>
 <div class="bg-white p-3 rounded-xl shadow-sm text-center"><p class="text-[10px] text-gray-500 font-bold">TOTAL SALES TO</p><p id="totTo" class="font-extrabold text-xs">0</p></div>
 <div class="bg-white p-3 rounded-xl shadow-sm text-center"><p class="text-[10px] text-gray-500 font-bold">TOTAL BRAND</p><p id="totBrand" class="font-extrabold">0</p></div>
 </div>
-
 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-3">
 <div class="overflow-x-auto">
-<table class="w-full text-[12px] min-w-[700px]">
+<table class="w-full text-[12px] min-w-[900px]">
 <thead class="bg-[#00B0F0] font-bold"><tr>
 <th class="p-2">No</th>
-<th class="p-2 text-left col-NAMA">NAMA</th>
-<th class="p-2 text-left col-BRAND">BRAND</th>
-<th class="p-2 text-left col-HARI">JADWAL VISIT</th>
-<th class="p-2 text-right col-TO">SALES TO</th>
-<th class="p-2 text-right col-TOLY">TO LY</th>
-<th class="p-2 text-center col-GROWTH">GROWTH</th>
-<th class="p-2 text-center col-KONT">KONTRIBUSI</th>
+<th class="p-2 text-left col-NAMA cursor-pointer" onclick="sortBy('nama')">NAMA <span id="arr-nama">▼</span></th>
+<th class="p-2 text-left col-BRAND cursor-pointer" onclick="sortBy('brand')">BRAND <span id="arr-brand"></span></th>
+<th class="p-2 text-left col-HARI cursor-pointer" onclick="sortBy('hari')">JADWAL VISIT <span id="arr-hari"></span></th>
+<th class="p-2 text-right col-TO cursor-pointer" onclick="sortBy('salesTo')">SALES TO <span id="arr-salesTo">▼</span></th>
+<th class="p-2 text-right col-TOLY cursor-pointer" onclick="sortBy('salesToLy')">TO LY <span id="arr-salesToLy"></span></th>
+<th class="p-2 text-center col-GROWTH cursor-pointer" onclick="sortBy('growth')">GROWTH <span id="arr-growth"></span></th>
+<th class="p-2 text-center col-KONT cursor-pointer" onclick="sortBy('kontribusi')">KONTRIBUSI <span id="arr-kontribusi"></span></th>
 </tr></thead>
 <tbody id="tbody"></tbody>
 </table>
 </div>
+<p class="text-[10px] text-gray-400 p-2">💡 Klik header untuk sorting A-Z / Terbesar-Terkecil. Klik NAMA untuk detail produk minus.</p>
 </div>
-
-<!-- DIAGRAM -->
 <div class="grid md:grid-cols-2 gap-3">
 <div id="boxKont" class="bg-white rounded-xl p-3 shadow-sm">
-<div class="flex justify-between items-center mb-2">
-<h4 class="font-bold text-xs">📊 Diagram Kontribusi per PIC</h4>
-<button onclick="downloadChart('chartKont')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">📥 PNG</button>
-</div>
-<canvas id="chartKont" height="200"></canvas>
-<div id="summaryKont" class="text-[11px] mt-3"></div>
+<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📊 Diagram Kontribusi per PIC</h4><button onclick="downloadChart('chartKont')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
+<canvas id="chartKont" height="200"></canvas><div id="summaryKont" class="text-[11px] mt-3"></div>
 </div>
 <div id="boxGrowth" class="bg-white rounded-xl p-3 shadow-sm">
-<div class="flex justify-between items-center mb-2">
-<h4 class="font-bold text-xs">📈 Diagram Growth per PIC</h4>
-<button onclick="downloadChart('chartGrowth')" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded">📥 PNG</button>
-</div>
-<canvas id="chartGrowth" height="200"></canvas>
-<div id="summaryGrowth" class="text-[11px] mt-3"></div>
+<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📈 Diagram Growth per PIC</h4><button onclick="downloadChart('chartGrowth')" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
+<canvas id="chartGrowth" height="200"></canvas><div id="summaryGrowth" class="text-[11px] mt-3"></div>
 </div>
 </div>
 </main>
 
+<div id="modalDetail" class="hidden fixed inset-0 bg-black/50 z-[100] flex justify-center items-start pt-10 p-3">
+  <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+    <div class="bg-[#00B0F0] text-white p-3 flex justify-between items-center">
+      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">Hitungan: (TO - LY)/LY % - Minus saja</p></div>
+      <button onclick="closeModal()" class="bg-white text-black rounded-full w-8 h-8 font-bold">×</button>
+    </div>
+    <div id="modalBody" class="p-3 max-h-[70vh] overflow-y-auto text-[12px]"></div>
+  </div>
+</div>
+
 <script>
 let grouped={}; let totalSalesTo=0;
 let chartKontInstance=null, chartGrowthInstance=null;
+let currentSort={field:'salesTo', dir:'desc'};
+let growthFilter='all';
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQcw_VWQ9-Z2JU87wyKKSruf5p6ZDZgfk3IDTFjt0p-r_NI0h9zcOjx8IQDy9c-UlLUN5JmTm-ggKDi/pub?output=csv";
 function parseCSV(t){const rows=[];let row=[],cur='',inQ=false;for(let i=0;i<t.length;i++){let c=t[i];if(c=='"'){if(t[i+1]=='"'){cur+='"';i++;}else inQ=!inQ;}else if(c==','&&!inQ){row.push(cur);cur='';}else if((c=='\n'||c=='\r')&&!inQ){if(cur!==''||row.length>0){row.push(cur);rows.push(row);row=[];cur='';}}else cur+=c;}if(cur!==''||row.length>0){row.push(cur);rows.push(row);}return rows;}
-function downloadChart(id){const c=document.getElementById(id);const a=document.createElement('a');a.download=id+'_'+(document.getElementById('q').value||'ALL')+'.png';a.href=c.toDataURL('image/png');a.click();}
-function load(){
- document.getElementById('status').innerText='Syncing dari Google Sheet lu...';
- fetch(CSV_URL).then(r=>r.text()).then(proses).catch(()=>{
-  fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses);
- });
-}
+function downloadChart(id){const c=document.getElementById(id);const a=document.createElement('a');a.download=id+'.png';a.href=c.toDataURL('image/png');a.click();}
+function load(){document.getElementById('status').innerText='Syncing...';fetch(CSV_URL).then(r=>r.text()).then(proses).catch(()=>{fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses);});}
 function proses(txt){
  const rows=parseCSV(txt);
  const header=rows[0].map(h=>h.toLowerCase().trim());
@@ -100,34 +99,64 @@ function proses(txt){
  let idxNama=header.indexOf('nama'); if(idxNama==-1) idxNama=11;
  let idxBrand=header.indexOf('brand'); if(idxBrand==-1) idxBrand=12;
  let idxHari=header.findIndex(h=>h.includes('hari')||h.includes('visit')); if(idxHari==-1) idxHari=13;
+ let idxArt=header.findIndex(h=>h.includes('su desc')||h.includes('article')); if(idxArt==-1) idxArt=2;
+ let idxCode=header.findIndex(h=>h.includes('article code')); if(idxCode==-1) idxCode=1;
  grouped={}; totalSalesTo=0;
  for(let i=1;i<rows.length;i++){
   const r=rows[i]; if(!r||r.length<=idxNama) continue;
   let nama=(r[idxNama]||'').replace(/"/g,'').trim().toUpperCase(); if(!nama||nama==='NAMA') continue;
   let brand=(r[idxBrand]||'').replace(/"/g,'').trim().toUpperCase();
   let hari=(r[idxHari]||'').replace(/"/g,'').trim();
+  let art=(r[idxArt]||'').replace(/"/g,'').trim();
+  let code=(r[idxCode]||'').replace(/"/g,'').trim();
   let to=parseFloat((r[idxTo]||'0').toString().replace(/[^0-9.-]/g,''))||0;
   let toLy=parseFloat((r[idxToLy]||'0').toString().replace(/[^0-9.-]/g,''))||0;
   let key=nama+'|'+brand;
-  if(!grouped[key]) grouped[key]={nama,brand,hariSet:new Set(),salesTo:0,salesToLy:0};
+  if(!grouped[key]) grouped[key]={nama,brand,hariSet:new Set(),salesTo:0,salesToLy:0, products:{}};
   grouped[key].salesTo+=to; grouped[key].salesToLy+=toLy;
   if(hari) grouped[key].hariSet.add(hari);
+  let prodKey=code+'|'+art;
+  if(!grouped[key].products[prodKey]) grouped[key].products[prodKey]={code,art,salesTo:0,salesToLy:0};
+  grouped[key].products[prodKey].salesTo+=to;
+  grouped[key].products[prodKey].salesToLy+=toLy;
   totalSalesTo+=to;
  }
- document.getElementById('status').innerText='✅ Berhasil sync: '+Object.keys(grouped).length+' data manpower. Total TO: '+totalSalesTo.toLocaleString();
+ document.getElementById('status').innerText='✅ Berhasil sync: '+Object.keys(grouped).length+' data';
  render();
+}
+function sortBy(field){
+  if(currentSort.field===field){ currentSort.dir = currentSort.dir==='desc' ? 'asc' : 'desc'; }else{ currentSort.field=field; if(field==='nama'||field==='brand'||field==='hari') currentSort.dir='asc'; else currentSort.dir='desc'; }
+  document.querySelectorAll('[id^=arr-]').forEach(e=>e.innerText='');
+  let arrow = currentSort.dir==='asc' ? '▲' : '▼';
+  let el=document.getElementById('arr-'+field); if(el) el.innerText=arrow;
+  render();
+}
+function setGrowthFilter(type){
+  growthFilter=type;
+  document.getElementById('btnAll').className='flex-1 bg-white border px-2 py-2 rounded-lg text-[11px] font-bold';
+  document.getElementById('btnMinus').className='flex-1 bg-white border border-red-300 text-red-600 px-2 py-2 rounded-lg text-[11px] font-bold';
+  document.getElementById('btnPlus').className='flex-1 bg-white border border-green-300 text-green-600 px-2 py-2 rounded-lg text-[11px] font-bold';
+  if(type==='all') document.getElementById('btnAll').className='flex-1 bg-blue-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold';
+  if(type==='minus') document.getElementById('btnMinus').className='flex-1 bg-red-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold';
+  if(type==='plus') document.getElementById('btnPlus').className='flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold';
+  render();
+}
+function closeModal(){ document.getElementById('modalDetail').classList.add('hidden'); }
+function showMinus(key){
+  let g=grouped[key]; if(!g) return;
+  document.getElementById('modalDetail').classList.remove('hidden');
+  document.getElementById('modalTitle').innerText='Detail Minus - '+g.nama+' | '+g.brand;
+  let prods=Object.values(g.products);
+  let minus=prods.filter(p=> p.salesToLy>0 && p.salesTo < p.salesToLy);
+  minus=minus.map(p=>{ let persen = p.salesToLy===0?0:((p.salesTo - p.salesToLy)/p.salesToLy*100); return {...p, persen}; }).sort((a,b)=>a.persen - b.persen);
+  if(minus.length===0){ document.getElementById('modalBody').innerHTML='<div class="text-center py-8"><p class="font-bold text-green-600">Nggak ada produk minus!</p><p class="text-[11px]">Semua growth PLUS</p></div>'; return; }
+  let html = '<div class="text-[11px] text-gray-500 mb-2">'+minus.length+' produk MINUS (TO < LY) - Tampil persen saja</div>';
+  html += minus.map(p=>{ return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.art||p.code)+'</p><p class="text-[10px] text-gray-500">'+p.code+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[12px]">'+p.persen.toFixed(1)+'%</span></div></div>'; }).join('');
+  document.getElementById('modalBody').innerHTML=html;
 }
 function render(){
  const q=document.getElementById('q').value.toLowerCase();
- const show={
-  NAMA: document.getElementById('cNama').checked,
-  BRAND: document.getElementById('cBrand').checked,
-  HARI: document.getElementById('cHari').checked,
-  TO: document.getElementById('cTo').checked,
-  TOLY: document.getElementById('cToLy').checked,
-  GROWTH: document.getElementById('cGrowth').checked,
-  KONT: document.getElementById('cKont').checked
- };
+ const show={ NAMA: document.getElementById('cNama').checked, BRAND: document.getElementById('cBrand').checked, HARI: document.getElementById('cHari').checked, TO: document.getElementById('cTo').checked, TOLY: document.getElementById('cToLy').checked, GROWTH: document.getElementById('cGrowth').checked, KONT: document.getElementById('cKont').checked };
  document.querySelectorAll('.col-NAMA').forEach(e=>e.classList.toggle('hidden',!show.NAMA));
  document.querySelectorAll('.col-BRAND').forEach(e=>e.classList.toggle('hidden',!show.BRAND));
  document.querySelectorAll('.col-HARI').forEach(e=>e.classList.toggle('hidden',!show.HARI));
@@ -137,60 +166,42 @@ function render(){
  document.querySelectorAll('.col-KONT').forEach(e=>e.classList.toggle('hidden',!show.KONT));
  document.getElementById('boxKont').classList.toggle('hidden',!show.KONT);
  document.getElementById('boxGrowth').classList.toggle('hidden',!show.GROWTH);
-
- let list=Object.values(grouped).map(g=>({nama:g.nama,brand:g.brand,hari:Array.from(g.hariSet).join(', '),salesTo:g.salesTo,salesToLy:g.salesToLy}));
+ let list=Object.values(grouped).map(g=>({key:g.nama+'|'+g.brand, nama:g.nama,brand:g.brand,hari:Array.from(g.hariSet).join(', '),salesTo:g.salesTo,salesToLy:g.salesToLy, growth: g.salesToLy===0?0:((g.salesTo-g.salesToLy)/g.salesToLy*100), kontribusi: totalSalesTo===0?0:(g.salesTo/totalSalesTo*100) }));
  list=list.filter(d=>!q||d.nama.toLowerCase().includes(q)||d.brand.toLowerCase().includes(q)||d.hari.toLowerCase().includes(q));
- list.sort((a,b)=>b.salesTo-a.salesTo);
-
+ if(growthFilter==='minus') list=list.filter(d=>d.growth<0);
+ if(growthFilter==='plus') list=list.filter(d=>d.growth>=0);
+ list.sort((a,b)=>{
+  let field=currentSort.field; let dir = currentSort.dir==='asc'?1:-1;
+  if(field==='nama') return a.nama.localeCompare(b.nama)*dir;
+  if(field==='brand') return a.brand.localeCompare(b.brand)*dir;
+  if(field==='hari') return a.hari.localeCompare(b.hari)*dir;
+  if(field==='salesTo') return (a.salesTo-b.salesTo)*dir;
+  if(field==='salesToLy') return (a.salesToLy-b.salesToLy)*dir;
+  if(field==='growth') return (a.growth-b.growth)*dir;
+  if(field==='kontribusi') return (a.kontribusi-b.kontribusi)*dir;
+  return 0;
+ });
  document.getElementById('totNama').innerText=new Set(list.map(x=>x.nama)).size;
  document.getElementById('totBrand').innerText=new Set(list.map(x=>x.brand)).size;
- document.getElementById('totTo').innerText=totalSalesTo.toLocaleString();
-
+ document.getElementById('totTo').innerText=list.reduce((s,x)=>s+x.salesTo,0).toLocaleString();
  document.getElementById('tbody').innerHTML=list.map((d,i)=>{
-  const growth=d.salesToLy===0?0:((d.salesTo-d.salesToLy)/d.salesToLy*100);
-  const kont=totalSalesTo===0?0:(d.salesTo/totalSalesTo*100);
-  return `<tr class="border-b hover:bg-blue-50">
-    <td class="p-2">${i+1}</td>
-    <td class="p-2 font-bold col-NAMA">${d.nama}</td>
-    <td class="p-2 col-BRAND"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">${d.brand||'-'}</span></td>
-    <td class="p-2 col-HARI text-[11px]">${d.hari||'-'}</td>
-    <td class="p-2 text-right col-TO">${d.salesTo.toLocaleString()}</td>
-    <td class="p-2 text-right col-TOLY text-gray-500">${d.salesToLy.toLocaleString()}</td>
-    <td class="p-2 text-center col-GROWTH font-bold ${growth>=0?'text-green-600':'text-red-600'}">${growth.toFixed(2)}%</td>
-    <td class="p-2 text-center col-KONT font-bold text-blue-600">${kont.toFixed(2)}%</td>
-  </tr>`;
+  const growth=d.growth; const kont=d.kontribusi;
+  return '<tr class="border-b hover:bg-blue-50"><td class="p-2">'+(i+1)+'</td><td class="p-2 font-bold col-NAMA text-blue-600 underline cursor-pointer" onclick="showMinus(\''+d.key+'\')">'+d.nama+'</td><td class="p-2 col-BRAND"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">'+(d.brand||'-')+'</span></td><td class="p-2 col-HARI text-[11px]">'+(d.hari||'-')+'</td><td class="p-2 text-right col-TO">'+d.salesTo.toLocaleString()+'</td><td class="p-2 text-right col-TOLY text-gray-500">'+d.salesToLy.toLocaleString()+'</td><td class="p-2 text-center col-GROWTH font-bold '+(growth>=0?'text-green-600':'text-red-600')+'">'+growth.toFixed(2)+'%</td><td class="p-2 text-center col-KONT font-bold text-blue-600">'+kont.toFixed(2)+'%</td></tr>';
  }).join('');
-
- const labels=list.map(d=>d.nama);
- const dataKont=list.map(d=> totalSalesTo===0?0:(d.salesTo/totalSalesTo*100));
- const dataGrowth=list.map(d=> d.salesToLy===0?0:((d.salesTo-d.salesToLy)/d.salesToLy*100));
-
+ const labels=list.map(d=>d.nama+' ('+d.brand+')');
+ const dataKont=list.map(d=>d.kontribusi);
+ const dataGrowth=list.map(d=>d.growth);
  if(show.KONT){
   const ctxKont=document.getElementById('chartKont').getContext('2d');
   if(chartKontInstance) chartKontInstance.destroy();
-  chartKontInstance=new Chart(ctxKont,{
-    type:'pie',
-    data:{labels:labels,datasets:[{data:dataKont,backgroundColor:['#2563eb','#f59e0b','#10b981','#ec4899','#8b5cf6']}]},
-    options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}}
-  );
-  let akum=0;
-  document.getElementById('summaryKont').innerHTML=list.map((d,i)=>{
-    const kont=dataKont[i]; akum+=kont;
-    return `<div class="flex justify-between py-1 border-b"><span><b>${d.nama}</b> (${d.salesTo.toLocaleString()})</span><span class="text-blue-600 font-bold">${kont.toFixed(1)}% (Akum ${akum.toFixed(1)}%)</span></div>`;
-  }).join('');
+  chartKontInstance=new Chart(ctxKont,{ type:'pie', data:{labels:labels,datasets:[{data:dataKont}]}, options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+  let akum=0; document.getElementById('summaryKont').innerHTML=list.map((d,i)=>{ const kont=dataKont[i]; akum+=kont; return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b> ('+d.salesTo.toLocaleString()+')</span><span class="text-blue-600 font-bold">'+kont.toFixed(1)+'% (Akum '+akum.toFixed(1)+'%)</span></div>'; }).join('');
  }
  if(show.GROWTH){
   const ctxGrowth=document.getElementById('chartGrowth').getContext('2d');
   if(chartGrowthInstance) chartGrowthInstance.destroy();
-  chartGrowthInstance=new Chart(ctxGrowth,{
-    type:'bar',
-    data:{labels:labels,datasets:[{label:'Growth %',data:dataGrowth,backgroundColor:dataGrowth.map(v=>v>=0?'#16a34a':'#dc2626')}]},
-    options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}
-  });
-  document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{
-    const growth=dataGrowth[i];
-    return `<div class="flex justify-between py-1 border-b"><span><b>${d.nama}</b></span><span class="${growth>=0?'text-green-600':'text-red-600'} font-bold">${growth.toFixed(1)}% | TO ${d.salesTo.toLocaleString()}</span></div>`;
-  }).join('');
+  chartGrowthInstance=new Chart(ctxGrowth,{ type:'bar', data:{labels:labels,datasets:[{label:'Growth %',data:dataGrowth}]}, options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
+  document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{ const growth=dataGrowth[i]; return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b></span><span class="'+(growth>=0?'text-green-600':'text-red-600')+' font-bold">'+growth.toFixed(1)+'% | TO '+d.salesTo.toLocaleString()+'</span></div>'; }).join('');
  }
 }
 window.onload=()=>{load();}
