@@ -3,9 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - V16.7 HIDE FINAL</title>
+<title>YOGYA CIANJUR - V16.8 RESPONSIVE 1 LAYAR HP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.responsive-table{width:100% !important; min-width:0 !important; table-layout:auto;}
+.responsive-table th, .responsive-table td{white-space:nowrap;}
+@media (max-width:768px){
+  .responsive-table{font-size:13px !important;}
+  .overflow-x-auto{overflow-x:auto !important; -webkit-overflow-scrolling:touch;}
+  .col-no{position:sticky; left:0; background:#00B0F0; z-index:1;}
+  td.col-no{position:sticky; left:0; background:white; z-index:1;}
+}
+</style>
 </head>
 <body class="bg-gray-100">
 <header class="bg-white shadow p-3 sticky top-0 z-20">
@@ -44,9 +54,9 @@
 </div>
 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-3">
 <div class="overflow-x-auto">
-<table class="w-full text-[12px] min-w-[900px]">
+<table class="w-full text-[12px] responsive-table">
 <thead class="bg-[#00B0F0] font-bold"><tr>
-<th class="p-2">No</th>
+<th class="p-2 w-[40px] col-no">No</th>
 <th class="p-2 text-left col-NAMA cursor-pointer" onclick="sortBy('nama')">NAMA <span id="arr-nama">▼</span></th>
 <th class="p-2 text-left col-BRAND cursor-pointer" onclick="sortBy('brand')">BRAND <span id="arr-brand"></span></th>
 <th class="p-2 text-left col-HARI cursor-pointer" onclick="sortBy('hari')">JADWAL VISIT <span id="arr-hari"></span></th>
@@ -90,10 +100,7 @@ function downloadChart(id){const c=document.getElementById(id);const a=document.
 function load(isManual){
  const statusEl=document.getElementById('status');
  statusEl.innerHTML=isManual?'🔄 Manual sync...':'⏳ Auto syncing...';
- fetch(CSV_URL,{mode:'cors'}).then(r=>{if(!r.ok) throw new Error('Direct HTTP '+r.status); return r.text();}).then(txt=>{
-   if(txt.includes('<html') || txt.length<100) throw new Error('Direct returned HTML');
-   proses(txt);
- }).catch(e1=>{
+ fetch(CSV_URL,{mode:'cors'}).then(r=>r.text()).then(proses).catch(e1=>{
    fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses).catch(e2=>{
      fetch('https://corsproxy.io/?'+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses);
    });
@@ -133,7 +140,7 @@ function proses(txt){
   grouped[key].products[prodKey].salesToLy+=toLy;
   totalSalesTo+=to;
  }
- document.getElementById('status').innerHTML='✅ Berhasil sync REAL CSV: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString()+'<br><small>Header: TO='+header[idxTo]+'('+idxTo+') LY='+header[idxToLy]+'('+idxToLy+') | Rows: '+(rows.length-1)+'</small>';
+ document.getElementById('status').innerHTML='✅ Berhasil sync REAL CSV: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString()+'<br><small>Rows: '+(rows.length-1)+'</small>';
  render();
 }
 function sortBy(field){
@@ -143,10 +150,7 @@ function sortBy(field){
   let el=document.getElementById('arr-'+field); if(el) el.innerText=arrow;
   render();
 }
-function setGrowthFilter(type){
-  growthFilter=type;
-  render();
-}
+function setGrowthFilter(type){ growthFilter=type; render(); }
 function closeModal(){ document.getElementById('modalDetail').classList.add('hidden'); }
 function showMinus(key){
   let g=grouped[key]; if(!g) return;
@@ -202,7 +206,7 @@ function render(){
     let hToLy = show.TOLY ? '' : ' hidden';
     let hGrowth = show.GROWTH ? '' : ' hidden';
     let hKont = show.KONT ? '' : ' hidden';
-    return '<tr class="border-b hover:bg-blue-50"><td class="p-2">'+(i+1)+'</td><td class="p-2 font-bold col-NAMA text-blue-600 underline cursor-pointer'+hNama+'" onclick="showMinus(\''+d.key+'\')">'+d.nama+'</td><td class="p-2 col-BRAND'+hBrand+'"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">'+(d.brand||'-')+'</span></td><td class="p-2 col-HARI text-[11px]'+hHari+'">'+(d.hari||'-')+'</td><td class="p-2 text-right col-TO'+hTo+'">'+d.salesTo.toLocaleString()+'</td><td class="p-2 text-right col-TOLY text-gray-500'+hToLy+'">'+d.salesToLy.toLocaleString()+'</td><td class="p-2 text-center col-GROWTH font-bold '+(growth>=0?'text-green-600':'text-red-600')+hGrowth+'">'+growth.toFixed(2)+'%</td><td class="p-2 text-center col-KONT font-bold text-blue-600'+hKont+'">'+kont.toFixed(2)+'%</td></tr>';
+    return '<tr class="border-b hover:bg-blue-50"><td class="p-2 col-no'+'">'+(i+1)+'</td><td class="p-2 font-bold col-NAMA text-blue-600 underline cursor-pointer'+hNama+'" onclick="showMinus(\''+d.key+'\')">'+d.nama+'</td><td class="p-2 col-BRAND'+hBrand+'"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">'+(d.brand||'-')+'</span></td><td class="p-2 col-HARI text-[11px]'+hHari+'">'+(d.hari||'-')+'</td><td class="p-2 text-right col-TO'+hTo+'">'+d.salesTo.toLocaleString()+'</td><td class="p-2 text-right col-TOLY text-gray-500'+hToLy+'">'+d.salesToLy.toLocaleString()+'</td><td class="p-2 text-center col-GROWTH font-bold '+(growth>=0?'text-green-600':'text-red-600')+hGrowth+'">'+growth.toFixed(2)+'%</td><td class="p-2 text-center col-KONT font-bold text-blue-600'+hKont+'">'+kont.toFixed(2)+'%</td></tr>';
    }).join('');
  }
  const labels=list.map(d=>d.nama+' ('+d.brand+')');
@@ -222,8 +226,6 @@ function render(){
  }
 }
 document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(()=>load(false), 500); });
-window.addEventListener('load', ()=>{ setTimeout(()=>load(false), 800); });
-setTimeout(()=>{ load(false); }, 1200);
 </script>
 </body>
   </html>
