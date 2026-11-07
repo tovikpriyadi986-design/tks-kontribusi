@@ -15,8 +15,8 @@
 <main class="p-2 max-w-7xl mx-auto">
 <div class="bg-white rounded-xl p-3 shadow-sm mb-3">
 <div class="flex gap-2">
-<button onclick="load()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1">🔄 Sync dari Google Sheet</button>
-<button onclick="document.getElementById('colBox').classList.toggle('hidden')" class="bg-gray-100 border px-3 py-2 rounded-lg text-xs font-bold">📊 Kolom ▼</button>
+<button onclick="load()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1">Sync dari Google Sheet</button>
+<button onclick="document.getElementById('colBox').classList.toggle('hidden')" class="bg-gray-100 border px-3 py-2 rounded-lg text-xs font-bold">Kolom</button>
 </div>
 <div id="status" class="text-[11px] font-bold mt-2">Siap sync...</div>
 <div id="colBox" class="hidden mt-3 grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border">
@@ -33,8 +33,8 @@
 <input id="q" onkeyup="render()" placeholder="Cari NAMA / BRAND / HARI VISIT..." class="w-full px-3 py-3 border-2 border-blue-100 rounded-xl text-sm">
 <div class="flex gap-2 mt-3">
 <button id="btnAll" onclick="setGrowthFilter('all')" class="flex-1 bg-blue-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold">Tampilkan Semua</button>
-<button id="btnMinus" onclick="setGrowthFilter('minus')" class="flex-1 bg-white border border-red-300 text-red-600 px-2 py-2 rounded-lg text-[11px] font-bold">📉 Growth MINUS Saja</button>
-<button id="btnPlus" onclick="setGrowthFilter('plus')" class="flex-1 bg-white border border-green-300 text-green-600 px-2 py-2 rounded-lg text-[11px] font-bold">📈 Growth PLUS Saja</button>
+<button id="btnMinus" onclick="setGrowthFilter('minus')" class="flex-1 bg-white border border-red-300 text-red-600 px-2 py-2 rounded-lg text-[11px] font-bold">Growth MINUS Saja</button>
+<button id="btnPlus" onclick="setGrowthFilter('plus')" class="flex-1 bg-white border border-green-300 text-green-600 px-2 py-2 rounded-lg text-[11px] font-bold">Growth PLUS Saja</button>
 </div>
 </div>
 <div class="grid grid-cols-3 gap-2 mb-3">
@@ -58,30 +58,27 @@
 <tbody id="tbody"></tbody>
 </table>
 </div>
-<p class="text-[10px] text-gray-400 p-2">💡 Klik header untuk sorting A-Z / Terbesar-Terkecil. Klik NAMA untuk detail produk minus.</p>
 </div>
 <div class="grid md:grid-cols-2 gap-3">
 <div id="boxKont" class="bg-white rounded-xl p-3 shadow-sm">
-<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📊 Diagram Kontribusi per PIC</h4><button onclick="downloadChart('chartKont')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
+<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">Diagram Kontribusi per PIC</h4><button onclick="downloadChart('chartKont')" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">PNG</button></div>
 <canvas id="chartKont" height="200"></canvas><div id="summaryKont" class="text-[11px] mt-3"></div>
 </div>
 <div id="boxGrowth" class="bg-white rounded-xl p-3 shadow-sm">
-<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">📈 Diagram Growth per PIC</h4><button onclick="downloadChart('chartGrowth')" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded">📥 PNG</button></div>
+<div class="flex justify-between items-center mb-2"><h4 class="font-bold text-xs">Diagram Growth per PIC</h4><button onclick="downloadChart('chartGrowth')" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded">PNG</button></div>
 <canvas id="chartGrowth" height="200"></canvas><div id="summaryGrowth" class="text-[11px] mt-3"></div>
 </div>
 </div>
 </main>
-
 <div id="modalDetail" class="hidden fixed inset-0 bg-black/50 z-[100] flex justify-center items-start pt-10 p-3">
   <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
     <div class="bg-[#00B0F0] text-white p-3 flex justify-between items-center">
-      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">Hitungan: (TO - LY)/LY % - Minus saja</p></div>
-      <button onclick="closeModal()" class="bg-white text-black rounded-full w-8 h-8 font-bold">×</button>
+      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">(TO - LY)/LY % - Minus saja</p></div>
+      <button onclick="closeModal()" class="bg-white text-black rounded-full w-8 h-8 font-bold">x</button>
     </div>
     <div id="modalBody" class="p-3 max-h-[70vh] overflow-y-auto text-[12px]"></div>
   </div>
 </div>
-
 <script>
 let grouped={}; let totalSalesTo=0;
 let chartKontInstance=null, chartGrowthInstance=null;
@@ -99,7 +96,8 @@ function proses(txt){
  let idxNama=header.indexOf('nama'); if(idxNama==-1) idxNama=11;
  let idxBrand=header.indexOf('brand'); if(idxBrand==-1) idxBrand=12;
  let idxHari=header.findIndex(h=>h.includes('hari')||h.includes('visit')); if(idxHari==-1) idxHari=13;
- let idxArt=header.findIndex(h=>h.includes('su desc')||h.includes('article')); if(idxArt==-1) idxArt=2;
+ let idxSu=header.findIndex(h=>h.includes('su description')||h.includes('su desc')); if(idxSu==-1) idxSu=2;
+ let idxNode=header.findIndex(h=>h.trim()==='node'); if(idxNode==-1) idxNode=0;
  let idxCode=header.findIndex(h=>h.includes('article code')); if(idxCode==-1) idxCode=1;
  grouped={}; totalSalesTo=0;
  for(let i=1;i<rows.length;i++){
@@ -107,7 +105,8 @@ function proses(txt){
   let nama=(r[idxNama]||'').replace(/"/g,'').trim().toUpperCase(); if(!nama||nama==='NAMA') continue;
   let brand=(r[idxBrand]||'').replace(/"/g,'').trim().toUpperCase();
   let hari=(r[idxHari]||'').replace(/"/g,'').trim();
-  let art=(r[idxArt]||'').replace(/"/g,'').trim();
+  let su=(r[idxSu]||'').replace(/"/g,'').trim();
+  let node=(r[idxNode]||'').replace(/"/g,'').trim();
   let code=(r[idxCode]||'').replace(/"/g,'').trim();
   let to=parseFloat((r[idxTo]||'0').toString().replace(/[^0-9.-]/g,''))||0;
   let toLy=parseFloat((r[idxToLy]||'0').toString().replace(/[^0-9.-]/g,''))||0;
@@ -115,13 +114,13 @@ function proses(txt){
   if(!grouped[key]) grouped[key]={nama,brand,hariSet:new Set(),salesTo:0,salesToLy:0, products:{}};
   grouped[key].salesTo+=to; grouped[key].salesToLy+=toLy;
   if(hari) grouped[key].hariSet.add(hari);
-  let prodKey=code+'|'+art;
-  if(!grouped[key].products[prodKey]) grouped[key].products[prodKey]={code,art,salesTo:0,salesToLy:0};
+  let prodKey=code+'|'+su+'|'+node;
+  if(!grouped[key].products[prodKey]) grouped[key].products[prodKey]={code,su,node,salesTo:0,salesToLy:0};
   grouped[key].products[prodKey].salesTo+=to;
   grouped[key].products[prodKey].salesToLy+=toLy;
   totalSalesTo+=to;
  }
- document.getElementById('status').innerText='✅ Berhasil sync: '+Object.keys(grouped).length+' data';
+ document.getElementById('status').innerText='Berhasil sync: '+Object.keys(grouped).length+' data';
  render();
 }
 function sortBy(field){
@@ -149,9 +148,11 @@ function showMinus(key){
   let prods=Object.values(g.products);
   let minus=prods.filter(p=> p.salesToLy>0 && p.salesTo < p.salesToLy);
   minus=minus.map(p=>{ let persen = p.salesToLy===0?0:((p.salesTo - p.salesToLy)/p.salesToLy*100); return {...p, persen}; }).sort((a,b)=>a.persen - b.persen);
-  if(minus.length===0){ document.getElementById('modalBody').innerHTML='<div class="text-center py-8"><p class="font-bold text-green-600">Nggak ada produk minus!</p><p class="text-[11px]">Semua growth PLUS</p></div>'; return; }
+  if(minus.length===0){ document.getElementById('modalBody').innerHTML='<div class="text-center py-8"><p class="font-bold text-green-600">Nggak ada produk minus!</p></div>'; return; }
   let html = '<div class="text-[11px] text-gray-500 mb-2">'+minus.length+' produk MINUS (TO < LY) - Tampil persen saja</div>';
-  html += minus.map(p=>{ return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.art||p.code)+'</p><p class="text-[10px] text-gray-500">'+p.code+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[12px]">'+p.persen.toFixed(1)+'%</span></div></div>'; }).join('');
+  html += minus.map(p=>{
+    return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.su||p.code)+'</p><p class="text-[10px] text-gray-500">'+(p.node||'-')+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[12px]">'+p.persen.toFixed(1)+'%</span></div></div>';
+  }).join('');
   document.getElementById('modalBody').innerHTML=html;
 }
 function render(){
@@ -194,17 +195,17 @@ function render(){
  if(show.KONT){
   const ctxKont=document.getElementById('chartKont').getContext('2d');
   if(chartKontInstance) chartKontInstance.destroy();
-  chartKontInstance=new Chart(ctxKont,{ type:'pie', data:{labels:labels,datasets:[{data:dataKont}]}, options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
+  chartKontInstance=new Chart(ctxKont,{ type:'pie', data:{labels:labels,[STRIPPED] options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});
   let akum=0; document.getElementById('summaryKont').innerHTML=list.map((d,i)=>{ const kont=dataKont[i]; akum+=kont; return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b> ('+d.salesTo.toLocaleString()+')</span><span class="text-blue-600 font-bold">'+kont.toFixed(1)+'% (Akum '+akum.toFixed(1)+'%)</span></div>'; }).join('');
  }
  if(show.GROWTH){
   const ctxGrowth=document.getElementById('chartGrowth').getContext('2d');
   if(chartGrowthInstance) chartGrowthInstance.destroy();
-  chartGrowthInstance=new Chart(ctxGrowth,{ type:'bar', data:{labels:labels,datasets:[{label:'Growth %',data:dataGrowth}]}, options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
+  chartGrowthInstance=new Chart(ctxGrowth,{ type:'bar', data:{labels:labels,[STRIPPED] %',data:dataGrowth}]}, options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
   document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{ const growth=dataGrowth[i]; return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b></span><span class="'+(growth>=0?'text-green-600':'text-red-600')+' font-bold">'+growth.toFixed(1)+'% | TO '+d.salesTo.toLocaleString()+'</span></div>'; }).join('');
  }
 }
 window.onload=()=>{load();}
 </script>
 </body>
-</html>
+  </html>
