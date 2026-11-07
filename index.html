@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - MANPOWER V16.5 FINAL REAL</title>
+<title>YOGYA CIANJUR - V16.7 HIDE FINAL</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100">
 <header class="bg-white shadow p-3 sticky top-0 z-20">
-<h1 class="font-extrabold text-sm">🇮🇩INDIVIDUAL SALES CONTRIBUTION - YCJ</h1>
+<h1 class="font-extrabold text-sm">📊INDIVIDUAL SALES CONTRIBUTION - YCJ</h1>
 <p class="text-[11px] text-green-600 font-bold">FOOD - YOGYA CIANJUR</p>
 </header>
 <main class="p-2 max-w-7xl mx-auto">
@@ -18,13 +18,13 @@
 <button onclick="load(true)" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex-1">🔄 Sync dari Google Sheet</button>
 <button onclick="document.getElementById('colBox').classList.toggle('hidden')" class="bg-gray-100 border px-3 py-2 rounded-lg text-xs font-bold">📊 Kolom ▼</button>
 </div>
-<div id="status" class="text-[11px] font-bold mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">⏳ Auto syncing REAL CSV...</div>
-<div id="colBox" class="hidden mt-3 grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border">
+<div id="status" class="text-[11px] font-bold mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">⏳ Auto syncing...</div>
+<div id="colBox" class="grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border mt-3">
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cNama" onchange="render()"> NAMA</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cBrand" onchange="render()"> BRAND</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cHari" onchange="render()"> JADWAL VISIT</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cTo" onchange="render()"> SALES TO</label>
-<label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" id="cToLy" onchange="render()"> TO LY</label>
+<label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cToLy" onchange="render()"> TO LY</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cGrowth" onchange="render()"> GROWTH</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cKont" onchange="render()"> KONTRIBUSI</label>
 </div>
@@ -55,7 +55,7 @@
 <th class="p-2 text-center col-GROWTH cursor-pointer" onclick="sortBy('growth')">GROWTH <span id="arr-growth"></span></th>
 <th class="p-2 text-center col-KONT cursor-pointer" onclick="sortBy('kontribusi')">KONTRIBUSI <span id="arr-kontribusi"></span></th>
 </tr></thead>
-<tbody id="tbody"><tr><td colspan="8" class="p-8 text-center text-gray-400">⏳ Loading data REAL...</td></tr></tbody>
+<tbody id="tbody"><tr><td colspan="8" class="p-8 text-center text-gray-400">⏳ Loading...</td></tr></tbody>
 </table>
 </div>
 </div>
@@ -94,30 +94,24 @@ function load(isManual){
    if(txt.includes('<html') || txt.length<100) throw new Error('Direct returned HTML');
    proses(txt);
  }).catch(e1=>{
-   statusEl.innerHTML='⚠️ Direct gagal ('+e1.message+')<br>🔄 Coba proxy 1...';
-   fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(txt=>{
-     if(txt.includes('<html') && txt.length<500) throw new Error('Proxy1 HTML');
-     proses(txt);
-   }).catch(e2=>{
-     statusEl.innerHTML='⚠️ Proxy1 gagal<br>🔄 Coba proxy 2...';
-     fetch('https://corsproxy.io/?'+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses).catch(e3=>{
-       statusEl.innerHTML='❌ Gagal semua!<br>Error: '+e1.message+' | '+e2.message+'<br><a href="'+CSV_URL+'" target="_blank" class="text-blue-600 underline">Coba buka CSV manual</a><br><br><button onclick="load(true)" class="bg-green-600 text-white px-4 py-2 rounded">Coba Lagi</button>';
-     });
+   fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses).catch(e2=>{
+     fetch('https://corsproxy.io/?'+encodeURIComponent(CSV_URL)).then(r=>r.text()).then(proses);
    });
  });
 }
 function proses(txt){
  const rows=parseCSV(txt);
+ if(!rows || rows.length<2){ document.getElementById('status').innerHTML='❌ CSV kosong'; return; }
  const header=rows[0].map(h=>h.toLowerCase().trim());
  let idxNode = 0; let idxCode = 1; let idxSu = 2; let idxTo = 7; let idxToLy = 8; let idxNama = 11; let idxBrand = 12; let idxHari = 13;
- let autoIdxTo = header.indexOf('sales to'); if(autoIdxTo!==-1) idxTo=autoIdxTo;
- let autoIdxToLy = header.indexOf('sales to ly'); if(autoIdxToLy!==-1) idxToLy=autoIdxToLy;
- let autoIdxNama = header.indexOf('nama'); if(autoIdxNama!==-1) idxNama=autoIdxNama;
- let autoIdxBrand = header.indexOf('brand'); if(autoIdxBrand!==-1) idxBrand=autoIdxBrand;
- let autoIdxHari = header.findIndex(h=>h.includes('hari')||h.includes('visit')); if(autoIdxHari!==-1) idxHari=autoIdxHari;
- let autoIdxSu = header.indexOf('su description'); if(autoIdxSu!==-1) idxSu=autoIdxSu;
- let autoIdxNode = header.indexOf('node'); if(autoIdxNode!==-1) idxNode=autoIdxNode;
- let autoIdxCode = header.indexOf('article code'); if(autoIdxCode!==-1) idxCode=autoIdxCode;
+ let a=header.indexOf('sales to'); if(a!==-1) idxTo=a;
+ let b=header.indexOf('sales to ly'); if(b!==-1) idxToLy=b;
+ let c=header.indexOf('nama'); if(c!==-1) idxNama=c;
+ let d=header.indexOf('brand'); if(d!==-1) idxBrand=d;
+ let e=header.findIndex(h=>h.includes('hari')||h.includes('visit')); if(e!==-1) idxHari=e;
+ let f=header.indexOf('su description'); if(f!==-1) idxSu=f;
+ let g=header.indexOf('node'); if(g!==-1) idxNode=g;
+ let h=header.indexOf('article code'); if(h!==-1) idxCode=h;
  grouped={}; totalSalesTo=0;
  for(let i=1;i<rows.length;i++){
   const r=rows[i]; if(!r||r.length<=idxNama) continue;
@@ -129,7 +123,6 @@ function proses(txt){
   let code=(r[idxCode]||'').replace(/"/g,'').trim();
   let to=parseFloat((r[idxTo]||'0').toString().replace(/[^0-9.-]/g,''))||0;
   let toLy=parseFloat((r[idxToLy]||'0').toString().replace(/[^0-9.-]/g,''))||0;
-  if(to===0 && toLy===0 && !su) continue;
   let key=nama+'|'+brand;
   if(!grouped[key]) grouped[key]={nama,brand,hariSet:new Set(),salesTo:0,salesToLy:0, products:{}};
   grouped[key].salesTo+=to; grouped[key].salesToLy+=toLy;
@@ -152,12 +145,6 @@ function sortBy(field){
 }
 function setGrowthFilter(type){
   growthFilter=type;
-  document.getElementById('btnAll').className='flex-1 bg-white border px-2 py-2 rounded-lg text-[11px] font-bold';
-  document.getElementById('btnMinus').className='flex-1 bg-white border border-red-300 text-red-600 px-2 py-2 rounded-lg text-[11px] font-bold';
-  document.getElementById('btnPlus').className='flex-1 bg-white border border-green-300 text-green-600 px-2 py-2 rounded-lg text-[11px] font-bold';
-  if(type==='all') document.getElementById('btnAll').className='flex-1 bg-blue-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold';
-  if(type==='minus') document.getElementById('btnMinus').className='flex-1 bg-red-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold';
-  if(type==='plus') document.getElementById('btnPlus').className='flex-1 bg-green-600 text-white px-2 py-2 rounded-lg text-[11px] font-bold';
   render();
 }
 function closeModal(){ document.getElementById('modalDetail').classList.add('hidden'); }
@@ -170,9 +157,7 @@ function showMinus(key){
   minus=minus.map(p=>{ let persen = p.salesToLy===0?0:((p.salesTo - p.salesToLy)/p.salesToLy*100); return {...p, persen}; }).sort((a,b)=>a.persen - b.persen);
   if(minus.length===0){ document.getElementById('modalBody').innerHTML='<div class="text-center py-8"><p class="font-bold text-green-600">Nggak ada produk minus!</p></div>'; return; }
   let html = '<div class="text-[11px] text-gray-500 mb-2">'+minus.length+' produk MINUS</div>';
-  html += minus.map(p=>{
-    return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.su||p.code||'-')+'</p><p class="text-[10px] text-gray-500">'+(p.node||'-')+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[12px]">'+p.persen.toFixed(1)+'%</span></div></div>';
-  }).join('');
+  html += minus.map(p=>{ return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.su||p.code||'-')+'</p><p class="text-[10px] text-gray-500">'+(p.node||'-')+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[12px]">'+p.persen.toFixed(1)+'%</span></div></div>'; }).join('');
   document.getElementById('modalBody').innerHTML=html;
 }
 function render(){
@@ -210,7 +195,14 @@ function render(){
  } else {
    document.getElementById('tbody').innerHTML=list.map((d,i)=>{
     const growth=d.growth; const kont=d.kontribusi;
-    return '<tr class="border-b hover:bg-blue-50"><td class="p-2">'+(i+1)+'</td><td class="p-2 font-bold col-NAMA text-blue-600 underline cursor-pointer" onclick="showMinus(\''+d.key+'\')">'+d.nama+'</td><td class="p-2 col-BRAND"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">'+(d.brand||'-')+'</span></td><td class="p-2 col-HARI text-[11px]">'+(d.hari||'-')+'</td><td class="p-2 text-right col-TO">'+d.salesTo.toLocaleString()+'</td><td class="p-2 text-right col-TOLY text-gray-500">'+d.salesToLy.toLocaleString()+'</td><td class="p-2 text-center col-GROWTH font-bold '+(growth>=0?'text-green-600':'text-red-600')+'">'+growth.toFixed(2)+'%</td><td class="p-2 text-center col-KONT font-bold text-blue-600">'+kont.toFixed(2)+'%</td></tr>';
+    let hNama = show.NAMA ? '' : ' hidden';
+    let hBrand = show.BRAND ? '' : ' hidden';
+    let hHari = show.HARI ? '' : ' hidden';
+    let hTo = show.TO ? '' : ' hidden';
+    let hToLy = show.TOLY ? '' : ' hidden';
+    let hGrowth = show.GROWTH ? '' : ' hidden';
+    let hKont = show.KONT ? '' : ' hidden';
+    return '<tr class="border-b hover:bg-blue-50"><td class="p-2">'+(i+1)+'</td><td class="p-2 font-bold col-NAMA text-blue-600 underline cursor-pointer'+hNama+'" onclick="showMinus(\''+d.key+'\')">'+d.nama+'</td><td class="p-2 col-BRAND'+hBrand+'"><span class="bg-gray-100 px-2 py-1 rounded-full text-[11px]">'+(d.brand||'-')+'</span></td><td class="p-2 col-HARI text-[11px]'+hHari+'">'+(d.hari||'-')+'</td><td class="p-2 text-right col-TO'+hTo+'">'+d.salesTo.toLocaleString()+'</td><td class="p-2 text-right col-TOLY text-gray-500'+hToLy+'">'+d.salesToLy.toLocaleString()+'</td><td class="p-2 text-center col-GROWTH font-bold '+(growth>=0?'text-green-600':'text-red-600')+hGrowth+'">'+growth.toFixed(2)+'%</td><td class="p-2 text-center col-KONT font-bold text-blue-600'+hKont+'">'+kont.toFixed(2)+'%</td></tr>';
    }).join('');
  }
  const labels=list.map(d=>d.nama+' ('+d.brand+')');
@@ -234,4 +226,4 @@ window.addEventListener('load', ()=>{ setTimeout(()=>load(false), 800); });
 setTimeout(()=>{ load(false); }, 1200);
 </script>
 </body>
-</html>
+  </html>
