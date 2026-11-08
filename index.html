@@ -83,7 +83,7 @@
 <div id="modalDetail" class="hidden fixed inset-0 bg-black/50 z-[100] flex justify-center items-start pt-10 p-3">
   <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
     <div class="bg-[#00B0F0] text-white p-3 flex justify-between items-center">
-      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">SU Description + NODE | (TO-LY)/LY</p></div>
+      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">SU Description + NODE + STOK | (TO-LY)/LY</p></div>
       <button onclick="closeModal()" class="bg-white text-black rounded-full w-8 h-8 font-bold">×</button>
     </div>
     <div id="modalBody" class="p-3 max-h-[70vh] overflow-y-auto text-[12px]"></div>
@@ -111,6 +111,7 @@ function proses(txt){
  if(!rows || rows.length<2){ document.getElementById('status').innerHTML='❌ CSV kosong'; return; }
  const header=rows[0].map(h=>h.toLowerCase().trim());
  let idxNode = 0; let idxCode = 1; let idxSu = 2; let idxTo = 7; let idxToLy = 8; let idxNama = 11; let idxBrand = 12; let idxHari = 13;
+ let idxStock = 3;
  let a=header.indexOf('sales to'); if(a!==-1) idxTo=a;
  let b=header.indexOf('sales to ly'); if(b!==-1) idxToLy=b;
  let c=header.indexOf('nama'); if(c!==-1) idxNama=c;
@@ -119,6 +120,7 @@ function proses(txt){
  let f=header.indexOf('su description'); if(f!==-1) idxSu=f;
  let g=header.indexOf('node'); if(g!==-1) idxNode=g;
  let h=header.indexOf('article code'); if(h!==-1) idxCode=h;
+ let s=header.findIndex(h=>h.includes('replen')); if(s!==-1) idxStock=s;
  grouped={}; totalSalesTo=0;
  for(let i=1;i<rows.length;i++){
   const r=rows[i]; if(!r||r.length<=idxNama) continue;
@@ -128,6 +130,8 @@ function proses(txt){
   let su=(r[idxSu]||'').replace(/"/g,'').trim();
   let node=(r[idxNode]||'').replace(/"/g,'').trim();
   let code=(r[idxCode]||'').replace(/"/g,'').trim();
+  let stockRaw=(r[idxStock]||'0').toString().replace(/"/g,'').trim();
+  let stockNum=parseFloat(stockRaw.replace(/[^0-9.-]/g,''))||0;
   let to=parseFloat((r[idxTo]||'0').toString().replace(/[^0-9.-]/g,''))||0;
   let toLy=parseFloat((r[idxToLy]||'0').toString().replace(/[^0-9.-]/g,''))||0;
   let key=nama+'|'+brand;
@@ -135,12 +139,14 @@ function proses(txt){
   grouped[key].salesTo+=to; grouped[key].salesToLy+=toLy;
   if(hari) grouped[key].hariSet.add(hari);
   let prodKey=code+'|'+su+'|'+node+'|'+i;
-  if(!grouped[key].products[prodKey]) grouped[key].products[prodKey]={code,su,node,salesTo:0,salesToLy:0};
+  if(!grouped[key].products[prodKey]) grouped[key].products[prodKey]={code,su,node,salesTo:0,salesToLy:0,stockRaw:stockRaw,stock:stockNum};
   grouped[key].products[prodKey].salesTo+=to;
   grouped[key].products[prodKey].salesToLy+=toLy;
+  if(stockNum>0) grouped[key].products[prodKey].stock=stockNum;
+  if(stockRaw) grouped[key].products[prodKey].stockRaw=stockRaw;
   totalSalesTo+=to;
  }
- document.getElementById('status').innerHTML='✅ Berhasil sync REAL CSV: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString()+'<br><small>Rows: '+(rows.length-1)+'</small>';
+ document.getElementById('status').innerHTML='✅ Berhasil sync REAL CSV: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString()+'<br><small>Stok Col: '+header[idxStock]+'('+idxStock+') | Rows: '+(rows.length-1)+'</small>';
  render();
 }
 function sortBy(field){
@@ -160,8 +166,11 @@ function showMinus(key){
   let minus=prods.filter(p=> p.salesToLy>0 && p.salesTo < p.salesToLy);
   minus=minus.map(p=>{ let persen = p.salesToLy===0?0:((p.salesTo - p.salesToLy)/p.salesToLy*100); return {...p, persen}; }).sort((a,b)=>a.persen - b.persen);
   if(minus.length===0){ document.getElementById('modalBody').innerHTML='<div class="text-center py-8"><p class="font-bold text-green-600">Nggak ada produk minus!</p></div>'; return; }
-  let html = '<div class="text-[11px] text-gray-500 mb-2">'+minus.length+' produk MINUS</div>';
-  html += minus.map(p=>{ return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.su||p.code||'-')+'</p><p class="text-[10px] text-gray-500">'+(p.node||'-')+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[12px]">'+p.persen.toFixed(1)+'%</span></div></div>'; }).join('');
+  let html = '<div class="text-[11px] text-gray-500 mb-2">'+minus.length+' produk MINUS - Stok dari Kolom D Replen. qty</div>';
+  html += minus.map(p=>{
+    let stokColor = (p.stock<=0) ? 'bg-red-600 text-white' : (p.stock<10 ? 'bg-orange-400 text-white' : 'bg-green-100 text-green-700');
+    return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.su||p.code||'-')+'</p><p class="text-[10px] text-gray-500">'+(p.node||'-')+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p><p class="text-[10px] mt-1"><span class="px-2 py-0.5 rounded-full font-bold '+stokColor+'">Stok: '+(p.stockRaw||p.stock)+'</span></p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[12px]">'+p.persen.toFixed(1)+'%</span></div></div>';
+  }).join('');
   document.getElementById('modalBody').innerHTML=html;
 }
 function render(){
