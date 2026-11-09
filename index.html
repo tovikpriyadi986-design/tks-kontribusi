@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - V16.9 STOK FILTER WARNA</title>
+<title>YOGYA CIANJUR - V16.10 TARGET & ACHV</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -29,6 +29,18 @@
 <button onclick="document.getElementById('colBox').classList.toggle('hidden')" class="bg-gray-100 border px-3 py-2 rounded-lg text-xs font-bold">📊 Kolom ▼</button>
 </div>
 <div id="status" class="text-[11px] font-bold mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">⏳ Auto syncing...</div>
+<div class="grid grid-cols-2 gap-2 mt-2">
+  <div class="bg-white border-2 border-blue-200 rounded-xl p-2">
+    <p class="text-[9px] font-extrabold text-gray-500">🎯 TARGET MANUAL</p>
+    <input id="targetInput" type="number" inputmode="numeric" placeholder="Contoh: 1500000000" class="w-full text-[13px] font-extrabold border-b-2 border-blue-300 focus:border-blue-600 focus:outline-none py-1.5 bg-transparent" oninput="hitungAchv()">
+    <p class="text-[8px] text-gray-400 mt-1">Ketik tanpa titik</p>
+  </div>
+  <div class="bg-gradient-to-br from-blue-600 to-blue-500 border-2 border-blue-600 rounded-xl p-2 text-center text-white shadow-sm">
+    <p class="text-[9px] font-extrabold opacity-90">📈 ACHIEVEMENT</p>
+    <p id="achvText" class="font-extrabold text-[18px] leading-none mt-1">0%</p>
+    <p id="achvDetail" class="text-[8px] opacity-80 mt-1 truncate">TO / Target</p>
+  </div>
+</div>
 <div id="colBox" class="grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border mt-3">
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cNama" onchange="render()"> NAMA</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cBrand" onchange="render()"> BRAND</label>
@@ -147,6 +159,7 @@ function proses(txt){
   totalSalesTo+=to;
  }
  document.getElementById('status').innerHTML='✅ Berhasil sync REAL CSV: '+Object.keys(grouped).length+' manpower | Total TO: '+totalSalesTo.toLocaleString()+'<br><small>Stok Col: '+header[idxStock]+'('+idxStock+') | Rows: '+(rows.length-1)+'</small>';
+ hitungAchv();
  render();
 }
 function sortBy(field){
@@ -158,8 +171,6 @@ function sortBy(field){
 }
 function setGrowthFilter(type){ growthFilter=type; render(); }
 function closeModal(){ document.getElementById('modalDetail').classList.add('hidden'); }
-
-// === TAMBAHAN TOMBOL WARNA FILTER STOK - MULAI ===
 let currentMinusAll=[]; let currentStokFilter='all';
 function getStokCat(p){ if(p.stock<=0) return 'merah'; if(p.stock>0 && p.stock<10) return 'oren'; return 'hijau'; }
 function filterStok(cat){
@@ -204,8 +215,22 @@ function showMinus(key){
   document.getElementById('modalBody').innerHTML=html;
   renderMinusList();
 }
-// === TAMBAHAN TOMBOL WARNA FILTER STOK - SELESAI ===
-
+function hitungAchv(){
+  let targetEl=document.getElementById('targetInput');
+  let achvEl=document.getElementById('achvText');
+  let detailEl=document.getElementById('achvDetail');
+  if(!targetEl||!achvEl) return;
+  let target=parseFloat((targetEl.value||'').toString().replace(/[^0-9]/g,''))||0;
+  if(target<=0){
+    achvEl.innerText='0%';
+    if(detailEl) detailEl.innerText='Masukkan target';
+    return;
+  }
+  let persen = totalSalesTo / target * 100;
+  achvEl.innerText=persen.toFixed(2)+'%';
+  if(detailEl) detailEl.innerText= totalSalesTo.toLocaleString()+' / '+target.toLocaleString();
+  try{ localStorage.setItem('ycj_target', target); }catch(e){}
+}
 function render(){
  const q=document.getElementById('q').value.toLowerCase();
  const show={ NAMA: document.getElementById('cNama').checked, BRAND: document.getElementById('cBrand').checked, HARI: document.getElementById('cHari').checked, TO: document.getElementById('cTo').checked, TOLY: document.getElementById('cToLy').checked, GROWTH: document.getElementById('cGrowth').checked, KONT: document.getElementById('cKont').checked };
@@ -267,7 +292,7 @@ function render(){
   document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{ const growth=dataGrowth[i]; return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b></span><span class="'+(growth>=0?'text-green-600':'text-red-600')+' font-bold">'+growth.toFixed(1)+'% | TO '+d.salesTo.toLocaleString()+'</span></div>'; }).join('');
  }
 }
-document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(()=>load(false), 500); });
+document.addEventListener('DOMContentLoaded', ()=>{ try{ let saved=localStorage.getItem('ycj_target'); if(saved){ document.getElementById('targetInput').value=saved; } }catch(e){} setTimeout(()=>load(false), 500); });
 </script>
 </body>
 </html>
