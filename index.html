@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - V16.10 TARGET & ACHV</title>
+<title>YOGYA CIANJUR - V16.11 SELISIH</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -95,7 +95,7 @@
 <div id="modalDetail" class="hidden fixed inset-0 bg-black/50 z-[100] flex justify-center items-start pt-10 p-3">
   <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
     <div class="bg-[#00B0F0] text-white p-3 flex justify-between items-center">
-      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">SU Description + NODE + STOK | (TO-LY)/LY</p></div>
+      <div><p id="modalTitle" class="font-extrabold text-sm">Detail Produk Minus</p><p class="text-[11px] opacity-90">SU Description + NODE + STOK + SELISIH | (TO-LY)/LY</p></div>
       <button onclick="closeModal()" class="bg-white text-black rounded-full w-8 h-8 font-bold">×</button>
     </div>
     <div id="modalBody" class="p-3 max-h-[70vh] overflow-y-auto text-[12px]"></div>
@@ -171,24 +171,32 @@ function sortBy(field){
 }
 function setGrowthFilter(type){ growthFilter=type; render(); }
 function closeModal(){ document.getElementById('modalDetail').classList.add('hidden'); }
-let currentMinusAll=[]; let currentStokFilter='all';
-function getStokCat(p){ if(p.stock<=0) return 'merah'; if(p.stock>0 && p.stock<10) return 'oren'; return 'hijau'; }
+let currentMinusAll=[]; let currentStokFilter='all'; let currentSelisihSort='besar';
+function getStokCat(p){ if(p.stock<=0) return 'merah'; return 'hijau'; }
 function filterStok(cat){
   currentStokFilter=cat;
   document.querySelectorAll('.btn-stok').forEach(b=>{ b.classList.remove('ring-2','ring-offset-1','ring-black'); b.classList.add('opacity-60'); });
   let active=document.getElementById('btn-'+cat); if(active){ active.classList.remove('opacity-60'); active.classList.add('ring-2','ring-offset-1','ring-black'); }
   renderMinusList();
 }
+function sortSelisih(mode){
+  currentSelisihSort=mode;
+  document.querySelectorAll('.btn-selisih').forEach(b=>{ b.classList.remove('bg-blue-600','text-white'); b.classList.add('bg-white','border','text-gray-600'); });
+  let active=document.getElementById('btn-selisih-'+mode); if(active){ active.classList.remove('bg-white','border','text-gray-600'); active.classList.add('bg-blue-600','text-white'); }
+  renderMinusList();
+}
 function renderMinusList(){
-  let list=currentMinusAll;
+  let list=currentMinusAll.slice();
   if(currentStokFilter!=='all') list=list.filter(p=>getStokCat(p)===currentStokFilter);
-  if(list.length===0){ document.getElementById('minusList').innerHTML='<div class="text-center py-8 text-gray-400 text-[12px]">Tidak ada stok '+currentStokFilter+'</div>'; return; }
+  if(currentSelisihSort==='besar'){ list.sort((a,b)=> (a.selisih - b.selisih)); } else { list.sort((a,b)=> (b.selisih - a.selisih)); }
+  if(list.length===0){ document.getElementById('minusList').innerHTML='<div class="text-center py-8 text-gray-400 text-[12px]">Tidak ada stok '+currentStokFilter+'</div>'; document.getElementById('countInfo').innerText='0 / '+currentMinusAll.length+' produk'; return; }
   let html=list.map(p=>{
-    let stokColor = (p.stock<=0) ? 'bg-red-600 text-white' : (p.stock<10 ? 'bg-orange-400 text-white' : 'bg-green-100 text-green-700 border border-green-200');
-    return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.su||p.code||'-')+'</p><p class="text-[10px] text-gray-500">'+(p.node||'-')+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p><p class="text-[10px] mt-1"><span class="px-2 py-0.5 rounded-full font-bold '+stokColor+'">Stok: '+(p.stockRaw||p.stock)+'</span></p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[12px]">'+p.persen.toFixed(1)+'%</span></div></div>';
+    let stokColor = (p.stock<=0) ? 'bg-red-600 text-white' : 'bg-green-100 text-green-700 border border-green-200';
+    let selisihColor = p.selisih<0 ? 'text-red-600' : 'text-green-600';
+    return '<div class="flex justify-between items-center py-2 border-b"><div class="flex-1 pr-2"><p class="font-bold text-[12px]">'+(p.su||p.code||'-')+'</p><p class="text-[10px] text-gray-500">'+(p.node||'-')+' | TO:'+p.salesTo.toLocaleString()+' vs LY:'+p.salesToLy.toLocaleString()+'</p><p class="text-[10px] mt-1 flex gap-1 items-center"><span class="px-2 py-0.5 rounded-full font-bold '+stokColor+'">Stok: '+(p.stockRaw||p.stock)+'</span><span class="px-2 py-0.5 rounded-full bg-gray-100 font-bold '+selisihColor+'">Selisih: '+(p.selisih>0?'+':'')+p.selisih.toLocaleString()+'</span></p></div><div><span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-extrabold text-[11px]">'+p.persen.toFixed(1)+'%</span></div></div>';
   }).join('');
   document.getElementById('minusList').innerHTML=html;
-  document.getElementById('countInfo').innerText=list.length+' / '+currentMinusAll.length+' produk | Filter: '+currentStokFilter.toUpperCase();
+  document.getElementById('countInfo').innerText=list.length+' / '+currentMinusAll.length+' produk | Filter: '+currentStokFilter.toUpperCase()+' | Sort: '+currentSelisihSort;
 }
 function showMinus(key){
   let g=grouped[key]; if(!g) return;
@@ -196,20 +204,22 @@ function showMinus(key){
   document.getElementById('modalTitle').innerText='Detail Minus - '+g.nama+' | '+g.brand;
   let prods=Object.values(g.products);
   let minus=prods.filter(p=> p.salesToLy>0 && p.salesTo < p.salesToLy);
-  minus=minus.map(p=>{ let persen = p.salesToLy===0?0:((p.salesTo - p.salesToLy)/p.salesToLy*100); return {...p, persen}; }).sort((a,b)=>a.persen - b.persen);
+  minus=minus.map(p=>{ let persen = p.salesToLy===0?0:((p.salesTo - p.salesToLy)/p.salesToLy*100); let selisih = p.salesTo - p.salesToLy; return {...p, persen, selisih}; });
   if(minus.length===0){ document.getElementById('modalBody').innerHTML='<div class="text-center py-8"><p class="font-bold text-green-600">Nggak ada produk minus!</p></div>'; return; }
-  currentMinusAll=minus; currentStokFilter='all';
+  currentMinusAll=minus; currentStokFilter='all'; currentSelisihSort='besar';
   let cMerah=minus.filter(p=>getStokCat(p)==='merah').length;
-  let cOren=minus.filter(p=>getStokCat(p)==='oren').length;
   let cHijau=minus.filter(p=>getStokCat(p)==='hijau').length;
   let html = '<div class="sticky top-0 bg-white pb-2 z-10 border-b mb-2">';
-  html += '<div class="flex gap-1.5 mb-2">';
-  html += '<button id="btn-all" onclick="filterStok(\'all\')" class="btn-stok flex-1 bg-gray-800 text-white px-2 py-2 rounded-full text-[11px] font-extrabold ring-2 ring-offset-1 ring-black">SEMUA ('+minus.length+')</button>';
-  html += '<button id="btn-merah" onclick="filterStok(\'merah\')" class="btn-stok flex-1 bg-red-600 text-white px-2 py-2 rounded-full text-[11px] font-extrabold">🔴 '+cMerah+'</button>';
-  html += '<button id="btn-oren" onclick="filterStok(\'oren\')" class="btn-stok flex-1 bg-orange-400 text-white px-2 py-2 rounded-full text-[11px] font-extrabold">🟠 '+cOren+'</button>';
-  html += '<button id="btn-hijau" onclick="filterStok(\'hijau\')" class="btn-stok flex-1 bg-green-100 text-green-700 border border-green-300 px-2 py-2 rounded-full text-[11px] font-extrabold">🟢 '+cHijau+'</button>';
+  html += '<div class="flex gap-1 mb-1.5">';
+  html += '<button id="btn-all" onclick="filterStok(\'all\')" class="btn-stok flex-1 bg-gray-700 text-white px-2 py-1.5 rounded-full text-[10px] font-bold ring-2 ring-offset-1 ring-black">SEMUA ('+minus.length+')</button>';
+  html += '<button id="btn-merah" onclick="filterStok(\'merah\')" class="btn-stok flex-1 bg-red-600 text-white px-2 py-1.5 rounded-full text-[10px] font-bold opacity-60">🔴 '+cMerah+'</button>';
+  html += '<button id="btn-hijau" onclick="filterStok(\'hijau\')" class="btn-stok flex-1 bg-green-100 text-green-700 border border-green-300 px-2 py-1.5 rounded-full text-[10px] font-bold opacity-60">🟢 '+cHijau+'</button>';
   html += '</div>';
-  html += '<div id="countInfo" class="text-[11px] text-gray-500 font-bold">'+minus.length+' produk MINUS - Stok dari Replen. qty</div>';
+  html += '<div class="flex gap-1 mb-1.5">';
+  html += '<button id="btn-selisih-besar" onclick="sortSelisih(\'besar\')" class="btn-selisih flex-1 bg-blue-600 text-white px-2 py-1 rounded-full text-[9px] font-bold">🔽 RUGI BESAR</button>';
+  html += '<button id="btn-selisih-kecil" onclick="sortSelisih(\'kecil\')" class="btn-selisih flex-1 bg-white border text-gray-600 px-2 py-1 rounded-full text-[9px] font-bold">🔼 RUGI KECIL</button>';
+  html += '</div>';
+  html += '<div id="countInfo" class="text-[10px] text-gray-500 font-bold">'+minus.length+' produk MINUS</div>';
   html += '</div>';
   html += '<div id="minusList"></div>';
   document.getElementById('modalBody').innerHTML=html;
@@ -295,4 +305,4 @@ function render(){
 document.addEventListener('DOMContentLoaded', ()=>{ try{ let saved=localStorage.getItem('ycj_target'); if(saved){ document.getElementById('targetInput').value=saved; } }catch(e){} setTimeout(()=>load(false), 500); });
 </script>
 </body>
-</html>
+  </html>
