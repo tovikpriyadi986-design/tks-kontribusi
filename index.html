@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YOGYA CIANJUR - V16.12 PERSEN SORT</title>
+<title>YOGYA CIANJUR - V16.13 SELISIH MERAH</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -20,7 +20,7 @@
 <body class="bg-gray-100">
 <header class="bg-white shadow p-3 sticky top-0 z-20">
 <h1 class="font-extrabold text-sm">📊INDIVIDUAL SALES CONTRIBUTION - YCJ</h1>
-<p class="text-[11px] text-green-600 font-bold">FOOD - SUPERMARKET - YOGYA CIANJUR</p>
+<p class="text-[11px] text-green-600 font-bold">FOOD - YOGYA CIANJUR - V16.13 SELISIH MERAH</p>
 </header>
 <main class="p-2 max-w-7xl mx-auto">
 <div class="bg-white rounded-xl p-3 shadow-sm mb-3">
@@ -41,7 +41,7 @@
     <p id="achvDetail" class="text-[8px] opacity-80 mt-1 truncate">TO / Target</p>
   </div>
 </div>
-<div id="colBox" class="grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border mt-3">
+<div id="colBox" class="grid grid-cols-2 gap-2 text-[11px] p-3 bg-gray-50 rounded-xl border mt-3 hidden">
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cNama" onchange="render()"> NAMA</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cBrand" onchange="render()"> BRAND</label>
 <label class="p-2 bg-white border rounded-lg flex gap-2 items-center"><input type="checkbox" checked id="cHari" onchange="render()"> JADWAL VISIT</label>
@@ -308,7 +308,8 @@ function render(){
   const ctxGrowth=document.getElementById('chartGrowth').getContext('2d');
   if(chartGrowthInstance) chartGrowthInstance.destroy();
   chartGrowthInstance=new Chart(ctxGrowth,{ type:'bar', data:{labels:labels, datasets:[{label:'Growth %',data:dataGrowth}]}, options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'}}}}});
-  document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{ const growth=dataGrowth[i]; return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b></span><span class="'+(growth>=0?'text-green-600':'text-red-600')+' font-bold">'+growth.toFixed(1)+'% | TO '+d.salesTo.toLocaleString()+'</span></div>'; }).join('');
+  // === UBAHAN SESUAI REQUEST: MERAH JADI SELISIH TO - TOLY ===
+  document.getElementById('summaryGrowth').innerHTML=list.map((d,i)=>{ const growth=dataGrowth[i]; const selisih = d.salesTo - d.salesToLy; const selisihTxt = (selisih>0?'+':'')+selisih.toLocaleString(); return '<div class="flex justify-between py-1 border-b"><span><b>'+d.nama+'</b></span><span class="'+(growth>=0?'text-green-600':'text-red-600')+' font-bold">'+growth.toFixed(1)+'% | '+selisihTxt+'</span></div>'; }).join('');
  }
 }
 document.addEventListener('DOMContentLoaded', ()=>{ try{ let saved=localStorage.getItem('ycj_target'); if(saved){ document.getElementById('targetInput').value=saved; } }catch(e){} setTimeout(()=>load(false), 500); });
